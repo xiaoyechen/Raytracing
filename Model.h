@@ -30,3 +30,10 @@
 #define TANGLE 20
 #define SATURATION 255
 
+typedef struct {
+	unsigned width, height;
+} window_t;
+
+typedef struct {
+	double r, g, b;
+} color_t;
