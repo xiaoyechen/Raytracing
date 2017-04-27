@@ -1,5 +1,3 @@
-#define _USE_MATH_DEFINES
-#include <cmath>
 #include "Camera.h"
 
 Camera::Camera()
@@ -12,16 +10,12 @@ Camera::~Camera()
 {
 	E->Erase();
 	delete E;
-
 	G->Erase();
 	delete G;
-
 	UP->Erase();
 	delete UP;
-
 	Mp->Erase();
 	delete Mp;
-	
 	S1->Erase();
 	delete S1;
 	T1->Erase();

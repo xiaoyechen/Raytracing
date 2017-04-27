@@ -1,4 +1,7 @@
 #pragma once
+#define _USE_MATH_DEFINES
+#include <climits>
+#include <cmath>
 #include "Matrix.h"
 
 #define OBJ_PLANE 1
@@ -30,10 +33,16 @@
 #define TANGLE 20
 #define SATURATION 255
 
-typedef struct {
+struct window_t {
 	unsigned width, height;
-} window_t;
+};
 
-typedef struct {
+struct color_t {
 	double r, g, b;
-} color_t;
+};
+
+struct hit_t {
+	unsigned enter_type, exit_type;
+	double enter, exit;
+};
+
