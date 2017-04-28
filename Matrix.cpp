@@ -80,6 +80,18 @@ Matrix<T>::~Matrix()
 	delete[] m_m;
 }
 
+template<class T>
+unsigned Matrix<T>::getLength()
+{
+	return m_length;
+}
+
+template<class T>
+unsigned Matrix<T>::getHeight()
+{
+	return m_height;
+}
+
 // free memory and reset pointer & h & l
 template<typename T>
 void Matrix<T>::Erase()

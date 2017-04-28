@@ -15,7 +15,9 @@ public:
 	void setUPWorld(double x, double y, double z);
 	void setMperspective(double near, double far);
 	void setTransformMatrices(double near, double far, double angle, window_t &w);
+	void setRotationAngle(double angle);
 	void buildCamera();
+	void moveCamera(unsigned dir, double angle);
 
 private:
 	Matrix<double>* UP, *E, *G,
@@ -26,8 +28,10 @@ private:
 		*T2, /* translation matrix that move (x,y) to positive quadrant */
 		*S2, /* scaling matrix so coord fit in display window */
 		*W, /* translate coord system so (0,0) is at top left corner of window */
-		*M;
-
+		*M,
+		*rmat_left, *rmat_right, *rmat_up, *rmat_down;
+	double rotate_angle;
 	void allocMemory();
+	Matrix<double>* calculateRotationalMatrix(const Matrix<double> &axis, double rangle);
 };
 

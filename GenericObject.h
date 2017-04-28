@@ -7,6 +7,7 @@ class GenericObject
 public:
 	virtual ~GenericObject();
 	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction) = 0;
+	const unsigned getType();
 protected:
 	GenericObject();
 	unsigned type;

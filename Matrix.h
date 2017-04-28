@@ -11,6 +11,9 @@ public:
 	Matrix(int axis, double rotation_theta);
 	~Matrix();
 	
+	unsigned getLength();
+	unsigned getHeight();
+
 	T& operator()(int i, int j);
 	T operator()(int i, int j) const;
 	void Erase();

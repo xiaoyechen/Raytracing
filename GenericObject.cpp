@@ -37,6 +37,11 @@ GenericObject::~GenericObject()
 	delete MInverse;
 }
 
+const unsigned GenericObject::getType()
+{
+	return type;
+}
+
 Cylinder::Cylinder()
 {
 	type = OBJ_CYLINDER;

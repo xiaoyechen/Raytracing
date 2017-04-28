@@ -46,3 +46,7 @@ struct hit_t {
 	double enter, exit;
 };
 
+struct light_t {
+	Matrix<double> position;
+	color_t color;
+};

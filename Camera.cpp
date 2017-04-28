@@ -94,6 +94,17 @@ void Camera::setTransformMatrices(double near, double, double angle, window_t &w
 	(*W)(2, 4) = (double)(w.height);
 }
 
+void Camera::setRotationAngle(double angle)
+{
+	rotate_angle = angle;
+
+	// calculate all rotational matrices
+	rmat_left = calculateRotationalMatrix(*UP, -rotate_angle);
+	rmat_right = calculateRotationalMatrix(*UP, rotate_angle);
+	rmat_up = calculateRotationalMatrix(*u, -rotate_angle);
+	rmat_down = calculateRotationalMatrix(*u, rotate_angle);
+}
+
 void Camera::buildCamera()
 {
 	n = E->subtract(*G)->normalize();
@@ -123,6 +134,34 @@ void Camera::buildCamera()
 	M = Mp->multiply(*Mv)->multiply(*T1)->multiply(*S1)->multiply(*T2)->multiply(*S2);
 }
 
+void Camera::moveCamera(unsigned dir, double angle)
+{
+	Matrix<double> newPos = *E;
+
+	switch (dir)
+	{
+	case CAM_L:
+		newPos = *rmat_left->multiply(newPos);
+		break;
+	case CAM_R:
+		newPos = *rmat_right->multiply(newPos);
+		break;
+	case CAM_U:
+		newPos = *rmat_up->multiply(newPos);
+		break;
+	case CAM_D:
+		newPos = *rmat_down->multiply(newPos);
+		break;
+	case CAM_N:
+		newPos = *newPos.subtract(*n);
+		break;
+	}
+
+	setEyeWorld(newPos(X, 1), newPos(Y, 1), newPos(Z, 1));
+
+	newPos.Erase();
+}
+
 void Camera::allocMemory()
 {
 	E = new Matrix<double>(4, 1);
@@ -135,4 +174,27 @@ void Camera::allocMemory()
 	T2 = new Matrix<double>(4, 4);
 	W = new Matrix<double>(4, 4);
 	Mv = new Matrix<double>(4, 4);
+}
+
+Matrix<double>* Camera::calculateRotationalMatrix(const Matrix<double> &axis, double rangle)
+{
+	Matrix<double> Jv(3, 3);
+	Jv(X, 1) = 0;
+	Jv(X, 2) = -axis(Z, 1);
+	Jv(X, 3) = axis(Y, 1);
+
+	Jv(Y, 1) = axis(Z, 1);
+	Jv(Y, 2) = 0;
+	Jv(Y, 3) = -axis(X, 1);
+
+	Jv(Z, 1) = -axis(Y, 1);
+	Jv(Z, 2) = axis(X, 1);
+	Jv(Z, 3) = 0;
+
+	Matrix<double> identity(3, 3);
+	identity.identity();
+
+	Matrix<double>* rmat = identity.add(*Jv.multiplyDot(sin(rangle)))->add(*Jv.multiply(Jv)->multiplyDot(1 - cos(rangle)));
+	
+	return rmat;
 }
