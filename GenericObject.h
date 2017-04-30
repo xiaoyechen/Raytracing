@@ -9,8 +9,11 @@ public:
 	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction) = 0;
 	
 	const unsigned getType();
+	const double getFallout();
 	const hit_t getRayHit();
 	double getAbmient(unsigned channel);
+	double getDiffuse(unsigned channel);
+	double getSpecular(unsigned channel);
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type)=0;
 protected:
 	GenericObject();

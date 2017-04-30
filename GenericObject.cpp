@@ -42,6 +42,11 @@ const unsigned GenericObject::getType()
 	return type;
 }
 
+const double GenericObject::getFallout()
+{
+	return fallout;
+}
+
 const hit_t GenericObject::getRayHit()
 {
 	return rayOnObj;
@@ -54,6 +59,26 @@ double GenericObject::getAbmient(unsigned channel)
 	case COLOR_R: return amb_color.r * amb_coeff;
 	case COLOR_G: return amb_color.g * amb_coeff;
 	case COLOR_B: return amb_color.b * amb_coeff;
+	}
+}
+
+double GenericObject::getDiffuse(unsigned channel)
+{
+	switch (channel)
+	{
+	case COLOR_R: return diff_color.r * diff_coeff;
+	case COLOR_G: return diff_color.g * diff_coeff;
+	case COLOR_B: return diff_color.b * diff_coeff;
+	}
+}
+
+double GenericObject::getSpecular(unsigned channel)
+{
+	switch (channel)
+	{
+	case COLOR_R: return spec_color.r * spec_coeff;
+	case COLOR_G: return spec_color.g * spec_coeff;
+	case COLOR_B: return spec_color.b * spec_coeff;
 	}
 }
 
