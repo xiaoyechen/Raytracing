@@ -17,6 +17,9 @@
 #define Z 3
 
 #define N_CHANNELS 3 // # RGB channels
+#define COLOR_R 0
+#define COLOR_G 1
+#define COLOR_B 2
 
 /* Default */
 #define LI (1.0) // light intensity

@@ -42,6 +42,21 @@ const unsigned GenericObject::getType()
 	return type;
 }
 
+const hit_t GenericObject::getRayHit()
+{
+	return rayOnObj;
+}
+
+double GenericObject::getAbmient(unsigned channel)
+{
+	switch (channel)
+	{
+	case COLOR_R: return amb_color.r * amb_coeff;
+	case COLOR_G: return amb_color.g * amb_coeff;
+	case COLOR_B: return amb_color.b * amb_coeff;
+	}
+}
+
 Cylinder::Cylinder()
 {
 	type = OBJ_CYLINDER;
@@ -129,6 +144,24 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	direction_s.Erase();
 }
 
+Matrix<double>* Cylinder::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
+{
+	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
+
+	if (hit_type == CYLINDER_BASE)
+		(*surf_normal)(Z, 1) = -1;
+	else if (hit_type == CYLINDER_TOP)
+		(*surf_normal)(Z, 1) = 1;
+	else
+	{
+		double denom = sqrt(intersection(X, 1)*intersection(X, 1) + intersection(Y, 1)*intersection(Y, 1));
+		(*surf_normal)(X, 1) = intersection(X, 1) / denom;
+		(*surf_normal)(Y, 1) = intersection(Y, 1) / denom;
+	}
+
+	return surf_normal;
+}
+
 Plane::Plane()
 {
 	type = OBJ_PLANE;
@@ -152,6 +185,14 @@ void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 
 	start_s.Erase();
 	direction_s.Erase();
+}
+
+Matrix<double>* Plane::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
+{
+	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
+
+	(*surf_normal)(Z, 1) = 1;
+	return surf_normal;
 }
 
 Sphere::Sphere()
@@ -187,6 +228,14 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 
 	start_s.Erase();
 	direction_s.Erase();
+}
+
+Matrix<double>* Sphere::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
+{
+	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
+
+	surf_normal->copy(intersection);
+	return surf_normal;
 }
 
 Cone::Cone()
@@ -268,4 +317,23 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 
 	start_s.Erase();
 	direction_s.Erase();
+}
+
+Matrix<double>* Cone::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
+{
+	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
+
+	if (hit_type == CONE_BASE)
+		(*surf_normal)(Z, 1) = -1;
+	else
+	{
+		double coeff = -1 / sqrt(2*intersection(X,1)*intersection(X,1)+2*intersection(Y,1)*intersection(Y,1)+((1-intersection(Z,1))/2)*((1 - intersection(Z, 1)) / 2));
+		(*surf_normal)(X, 1) = 2 * intersection(X, 1);
+		(*surf_normal)(Y, 1) = 2 * intersection(Y, 1);
+		(*surf_normal)(Z, 1) = (1 - intersection(Z, 1)) / 2;
+		Matrix<double> result = *surf_normal->multiplyDot(coeff);
+		surf_normal->copy(result);
+		result.Erase();
+	}
+	return surf_normal;
 }

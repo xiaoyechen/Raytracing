@@ -26,6 +26,26 @@ Camera::~Camera()
 	delete T2;
 }
 
+Matrix<double>* Camera::getU()
+{
+	return u;
+}
+
+Matrix<double>* Camera::getV()
+{
+	return v;
+}
+
+Matrix<double>* Camera::getN()
+{
+	return n;
+}
+
+Matrix<double>* Camera::getE()
+{
+	return E;
+}
+
 void Camera::setEyeWorld(double x, double y, double z)
 {
 	(*E)(1, 1) = x;

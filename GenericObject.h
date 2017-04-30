@@ -7,7 +7,11 @@ class GenericObject
 public:
 	virtual ~GenericObject();
 	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction) = 0;
+	
 	const unsigned getType();
+	const hit_t getRayHit();
+	double getAbmient(unsigned channel);
+	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type)=0;
 protected:
 	GenericObject();
 	unsigned type;
@@ -25,7 +29,7 @@ public:
 	Sphere();
 	virtual ~Sphere();
 	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction);
-
+	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type);
 };
 
 class Plane : GenericObject
@@ -34,7 +38,7 @@ public:
 	Plane();
 	virtual ~Plane();
 	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction);
-
+	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type);
 };
 class Cylinder : GenericObject
 {
@@ -42,7 +46,7 @@ public:
 	Cylinder();
 	virtual ~Cylinder();
 	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction);
-
+	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type);
 };
 class Cone : GenericObject
 {
@@ -50,5 +54,5 @@ public:
 	Cone();
 	virtual ~Cone();
 	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction);
-
+	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type);
 };

@@ -75,6 +75,13 @@ Matrix<T>::Matrix(int axis, double rotation_theta)
 }
 
 template<typename T>
+Matrix<T>::Matrix(const Matrix<double> &mat)
+	:Matrix(mat.getHeight(), mat.getLength())
+{
+	copy(mat);
+}
+
+template<typename T>
 Matrix<T>::~Matrix()
 {
 	delete[] m_m;
@@ -117,6 +124,18 @@ T Matrix<T>::operator()(int i, int j) const
 	assert(i > 0 && i <= m_height && j > 0 && j <= m_length);
 
 	return m_m[i * (m_length + 1) + j];
+}
+
+template<class T>
+void Matrix<T>::copy(const  Matrix<double> &mat)
+{
+	assert(mat.getHeight == m_height && mat.getLength == m_length);
+
+	for (unsigned i = 1; i <= m_height; ++i)
+	{
+		for (unsigned j = 1; j <= m_length; ++j)
+			(*this)(i, j) = mat(i, j);
+	}
 }
 
 template<class T>
@@ -255,7 +274,7 @@ double Matrix<T>::normal()
 	for (unsigned i = 1; i <= m_height; ++i)
 	{
 		for (unsigned j = 1; j <= m_length; ++j)
-			sum += pow((*this)(i, j), 2);
+			sum += (*this)(i, j) * (*this)(i, j);
 	}
 
 	return sqrt(sum);

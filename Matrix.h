@@ -9,6 +9,7 @@ public:
 	Matrix(unsigned height, unsigned length);
 	Matrix(int height, int length, T val);
 	Matrix(int axis, double rotation_theta);
+	Matrix(const Matrix<double> &mat);
 	~Matrix();
 	
 	unsigned getLength();
@@ -16,6 +17,7 @@ public:
 
 	T& operator()(int i, int j);
 	T operator()(int i, int j) const;
+	void copy(const Matrix<double> &mat);
 	void Erase();
 	void printFormat();
 
