@@ -1,10 +1,11 @@
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <cstdio>
-#include <cstdlib>
+//#include <X11/Xlib.h>
+//#include <X11/Xutil.h>
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "Raytracer.h"
 #include "Window.h"
 
+/*
 Display *initX(Display *d, Window *w, int *s, int w_width, int w_height)
 {
 	d = XOpenDisplay(NULL);
@@ -49,21 +50,28 @@ void drawObj(Display *d, Window w, int s, int w_width, int w_height, int*** fram
 		}
 	}
 }
-
+*/
 void draw(window_t screen, Camera &cam, std::vector<GenericObject> objects, light_t &light, light_t light_inf, double near, double view_angle)
 {
-	Display *d;
-	Window w;
-	XEvent e;
+	//Display *d;
+	//Window w;
+	//XEvent e;
 	int s;
 
-	d = initX(d, &w, &s, screen.width, screen.height);
+	//d = initX(d, &w, &s, screen.width, screen.height);
 
-	int framebuffer[screen.height][screen.width][N_CHANNELS];
+	int*** framebuffer = new int**[N_CHANNELS];
+	for (unsigned idx = 0; idx <= N_CHANNELS; ++idx)
+	{
+		framebuffer[idx] = new int*[screen.height];
+		for (unsigned i = 0; i < screen.height; ++i)
+			framebuffer[idx][i] = new int[screen.width];
+	}
+	
 	double near_h = near*tan(M_PI / 180 * view_angle / 2.0);
 	
-	raytrace(screen, framebuffer, objects, light, light_inf, near, near_h);
-
+	raytrace(screen, &cam, framebuffer, objects, light, light_inf, near, near_h);
+/*
 	while (true)
 	{
 		XNextEvent(d, &e);
@@ -106,4 +114,16 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject> objects, ligh
 	}
 
 	quitX(d, w);
+	*/
+
+	// dealloc framebuffer
+	
+
+	for (unsigned idx = 0; idx <= N_CHANNELS; ++idx)
+	{
+		for (unsigned i = 0; i < screen.height; ++i)
+			delete[] framebuffer[idx][i];
+		delete[] framebuffer[idx];
+	}
+	delete[] framebuffer;
 }

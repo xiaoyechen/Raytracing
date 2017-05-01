@@ -1,7 +1,5 @@
 #pragma once
-#define _USE_MATH_DEFINES
-#include <climits>
-#include <cmath>
+
 #include "Matrix.h"
 
 #define OBJ_PLANE 1
