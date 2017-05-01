@@ -37,6 +37,52 @@ GenericObject::~GenericObject()
 	delete MInverse;
 }
 
+void GenericObject::setType(unsigned t)
+{
+	type = t;
+}
+
+void GenericObject::setColor(unsigned color_type, double r, double g, double b)
+{
+	switch (color_type)
+	{
+	case COLOR_ORIGIN:
+		color.r = r; color.g = g; color.b = b; break;
+	case COLOR_DIFFUSE:
+		diff_color.r = r; diff_color.g = g; diff_color.b = b; break;
+	case COLOR_SPEC:
+		spec_color.r = r; spec_color.g = g; spec_color.b = b; break;
+	case COLOR_AMBIENT:
+		amb_color.r = r; amb_color.g = g; amb_color.b = b; break;
+	}
+	
+}
+
+void GenericObject::setColorCoeff(unsigned color_type, double coeff)
+{
+	switch (color_type)
+	{
+	case COLOR_DIFFUSE:
+		diff_coeff = coeff; break;
+	case COLOR_SPEC:
+		spec_coeff = coeff; break;
+	case COLOR_AMBIENT:
+		amb_coeff = coeff; break;
+	}
+}
+
+void GenericObject::setFallout(double val)
+{
+	fallout = val;
+}
+
+void GenericObject::setAffineTransMat(Matrix<double>& mat)
+{
+	M->copy(mat);
+	MInverse = M->inverse();
+}
+
+
 const unsigned GenericObject::getType()
 {
 	return type;
