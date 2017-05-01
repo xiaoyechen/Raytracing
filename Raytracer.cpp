@@ -1,7 +1,5 @@
 #include <iostream>
-#include <vector>
-#include "Camera.h"
-#include "GenericObject.h"
+#include "Raytracer.h"
 
 unsigned finObjIdx(std::vector<GenericObject> &objects, unsigned num, unsigned target_type)
 {

@@ -84,9 +84,9 @@ void Camera::setMperspective(double near, double far)
 	(*Mp)(4, 4) = 0;
 }
 
-void Camera::setTransformMatrices(double near, double, double angle, window_t &w)
+void Camera::setTransformMatrices(double near, double angle, window_t w)
 {
-	double aspect_ratio = w.width * 1.0 / w.height;
+	double aspect_ratio = w.width*1.0 / w.height;
 
 	double top = near * tan((M_PI / 180) * (angle / 2));
 	double bottom = -top;
@@ -154,7 +154,7 @@ void Camera::buildCamera()
 	M = Mp->multiply(*Mv)->multiply(*T1)->multiply(*S1)->multiply(*T2)->multiply(*S2);
 }
 
-void Camera::moveCamera(unsigned dir, double angle)
+void Camera::moveCamera(unsigned dir)
 {
 	Matrix<double> newPos = *E;
 

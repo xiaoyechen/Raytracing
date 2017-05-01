@@ -17,10 +17,10 @@ public:
 	void setGazeWorld(double x, double y, double z);
 	void setUPWorld(double x, double y, double z);
 	void setMperspective(double near, double far);
-	void setTransformMatrices(double near, double far, double angle, window_t &w);
+	void setTransformMatrices(double near, double angle, window_t w);
 	void setRotationAngle(double angle);
 	void buildCamera();
-	void moveCamera(unsigned dir, double angle);
+	void moveCamera(unsigned dir);
 
 private:
 	Matrix<double>* UP, *E, *G,

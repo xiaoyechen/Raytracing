@@ -5,6 +5,7 @@
 #include "model.h"
 #include "Camera.h"
 #include "GenericObject.h"
+#include "Window.h"
 using namespace std;
 
 #define ARG_NUM 2
@@ -51,12 +52,16 @@ int main(int argc, char** argv)
 	inf >> near >> far;
 	cam.setMperspective(near, far);
 
-	double angle;
-	inf >> angle;
-	cam.setTransformMatrices(near, far, angle, display_window);
+	double view_angle;
+	inf >> view_angle;
+	cam.setTransformMatrices(near, view_angle, display_window);
 
 	inf >> cam_x >> cam_y >> cam_z;
 	cam.setUPWorld(cam_x, cam_y, cam_z);
+
+	// remaining of camera setup
+	cam.setRotationAngle(TANGLE);
+	cam.buildCamera();
 
 	// Initialize objects
 	unsigned obj_num;
@@ -64,7 +69,6 @@ int main(int argc, char** argv)
 
 	vector<GenericObject> objects(obj_num);
 
-	
 	for(auto obj = objects.begin(); obj!=objects.end(); ++obj)
 	{
 		unsigned obj_type;
@@ -103,6 +107,8 @@ int main(int argc, char** argv)
 	}
 
 	inf.close();
+
+	draw(display_window, cam, objects, light, light_inf, near, view_angle);
 
 	exit(EXIT_SUCCESS);
 }
