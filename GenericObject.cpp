@@ -281,10 +281,10 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	Matrix<double> start_s = *MInverse->multiply(start);
 	Matrix<double> direction_s = *MInverse->multiply(direction);
 
-	double a = direction_s.normal;
+	double a = direction_s.normal();
 	a *= a;
 	double b = start_s.multiplyDot(direction_s);
-	double c = start_s.normal;
+	double c = start_s.normal();
 	c *= c;
 
 	double isRayHit = b*b - a*c;

@@ -31,7 +31,7 @@ Matrix<T>::Matrix(unsigned height, unsigned length)
 
 template<class T>
 Matrix<T>::Matrix(int height, int length, T val)
-	: Matrix(height,length)
+	: Matrix((unsigned)height, (unsigned)length)
 {
 	for (unsigned i = 1; i <= m_height; ++i)
 	{
@@ -88,13 +88,13 @@ Matrix<T>::~Matrix()
 }
 
 template<class T>
-unsigned Matrix<T>::getLength()
+unsigned Matrix<T>::getLength() const
 {
 	return m_length;
 }
 
 template<class T>
-unsigned Matrix<T>::getHeight()
+unsigned Matrix<T>::getHeight() const
 {
 	return m_height;
 }
@@ -127,25 +127,14 @@ T Matrix<T>::operator()(int i, int j) const
 }
 
 template<class T>
-void Matrix<T>::copy(const  Matrix<double> &mat)
+void Matrix<T>::copy(const Matrix<double> &mat)
 {
-	assert(mat.getHeight == m_height && mat.getLength == m_length);
+	assert(mat.getHeight() == m_height && mat.getLength() == m_length);
 
 	for (unsigned i = 1; i <= m_height; ++i)
 	{
 		for (unsigned j = 1; j <= m_length; ++j)
 			(*this)(i, j) = mat(i, j);
-	}
-}
-
-template<class T>
-void Matrix<T>::printFormat()
-{
-	for (unsigned i = 1; i <= m_height; ++i)
-	{
-		for (unsigned j = 1; j < m_length; ++j)
-			std::cout << (*this)(i, j) << ", ";
-		std::cout << "\n";
 	}
 }
 
@@ -394,4 +383,14 @@ Matrix<T>* Matrix<T>::inverse()
 	return result;
 }
 
-
+template<class T>
+std::ostream & operator<<(std::ostream & out, const Matrix<T> &mat)
+{
+	for (unsigned i = 1; i <= m_height; ++i)
+	{
+		for (unsigned j = 1; j < m_length; ++j)
+			out << (*this)(i, j) << ", ";
+		out << "\n";
+	}
+	return out;
+}

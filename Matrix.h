@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 template<class T>
 class Matrix
@@ -12,14 +13,15 @@ public:
 	Matrix(const Matrix<double> &mat);
 	~Matrix();
 	
-	unsigned getLength();
-	unsigned getHeight();
+	unsigned getLength()const;
+	unsigned getHeight()const;
 
 	T& operator()(int i, int j);
 	T operator()(int i, int j) const;
 	void copy(const Matrix<double> &mat);
 	void Erase();
-	void printFormat();
+
+	friend std::ostream& operator<<(std::ostream& out, const Matrix<T> &mat);
 
 	void identity();
 	Matrix<T>* add(const Matrix<T> &matB);
