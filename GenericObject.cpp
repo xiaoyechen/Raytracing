@@ -29,6 +29,24 @@ void GenericObject::resetHit()
 }
 
 
+GenericObject * GenericObject::makeObject(unsigned id)
+{
+	switch (id)
+	{
+	case OBJ_PLANE:
+		return new Plane;
+	case OBJ_SPHERE:
+		return new Sphere;
+	case OBJ_CYLINDER:
+		return new Cylinder;
+	case OBJ_CONE:
+		return new Cone;
+	default:
+		return nullptr;
+	}
+	
+}
+
 GenericObject::~GenericObject()
 {
 	M->Erase();

@@ -10,6 +10,7 @@
 class GenericObject
 {
 public:
+	static GenericObject* makeObject(unsigned id);
 	virtual ~GenericObject();
 	void setType(unsigned t);
 	void setColor(unsigned color_type, double r, double g, double b);
@@ -36,7 +37,7 @@ protected:
 	void resetHit();
 };
 
-class Sphere : GenericObject
+class Sphere : public GenericObject
 {
 public:
 	Sphere();
@@ -45,7 +46,7 @@ public:
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type);
 };
 
-class Plane : GenericObject
+class Plane : public GenericObject
 {
 public:
 	Plane();
@@ -53,7 +54,7 @@ public:
 	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction);
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type);
 };
-class Cylinder : GenericObject
+class Cylinder : public GenericObject
 {
 public:
 	Cylinder();
@@ -61,7 +62,7 @@ public:
 	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction);
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type);
 };
-class Cone : GenericObject
+class Cone : public GenericObject
 {
 public:
 	Cone();

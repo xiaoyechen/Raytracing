@@ -51,7 +51,7 @@ void drawObj(Display *d, Window w, int s, int w_width, int w_height, int*** fram
 	}
 }
 */
-void draw(window_t screen, Camera &cam, std::vector<GenericObject> objects, light_t &light, light_t light_inf, double near, double view_angle)
+void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, light_t &light, light_t light_inf, double near, double view_angle)
 {
 	//Display *d;
 	//Window w;

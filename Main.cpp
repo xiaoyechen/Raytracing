@@ -67,34 +67,35 @@ int main(int argc, char** argv)
 	unsigned obj_num;
 	inf >> obj_num;
 
-	vector<GenericObject> objects(obj_num);
+	vector<GenericObject*> objects;
 
-	for(auto obj = objects.begin(); obj!=objects.end(); ++obj)
+	for(unsigned obj_idx = 0; obj_idx < obj_num; ++obj_idx)
 	{
 		unsigned obj_type;
 		inf >> obj_type;
-		obj->setType(obj_type);
+
+		objects.push_back(GenericObject::makeObject(obj_type));
 
 		double color_r, color_g, color_b;
 		inf >> color_r >> color_g >> color_b;
-		obj->setColor(COLOR_ORIGIN, color_r, color_g, color_b);
+		objects[obj_idx]->setColor(COLOR_ORIGIN, color_r, color_g, color_b);
 
 		double coeff;
 		inf >> color_r >> color_g >> color_b >> coeff;
-		obj->setColor(COLOR_DIFFUSE, color_r, color_g, color_b);
-		obj->setColorCoeff(COLOR_DIFFUSE, coeff);
+		objects[obj_idx]->setColor(COLOR_DIFFUSE, color_r, color_g, color_b);
+		objects[obj_idx]->setColorCoeff(COLOR_DIFFUSE, coeff);
 
 		inf >> color_r >> color_g >> color_b >> coeff;
-		obj->setColor(COLOR_SPEC, color_r, color_g, color_b);
-		obj->setColorCoeff(COLOR_SPEC, coeff);
+		objects[obj_idx]->setColor(COLOR_SPEC, color_r, color_g, color_b);
+		objects[obj_idx]->setColorCoeff(COLOR_SPEC, coeff);
 
 		inf >> color_r >> color_g >> color_b >> coeff;
-		obj->setColor(COLOR_AMBIENT, color_r, color_g, color_b);
-		obj->setColorCoeff(COLOR_AMBIENT, coeff);
+		objects[obj_idx]->setColor(COLOR_AMBIENT, color_r, color_g, color_b);
+		objects[obj_idx]->setColorCoeff(COLOR_AMBIENT, coeff);
 
 		double fallout;
 		inf >> fallout;
-		obj->setFallout(fallout);
+		objects[obj_idx]->setFallout(fallout);
 
 		Matrix<double> mat(4, 3);
 		for (unsigned row = 1; row <= 4; ++row)
@@ -102,12 +103,12 @@ int main(int argc, char** argv)
 			for (unsigned col = 1; col <= 3; ++col)
 				inf >> mat(row, col);
 		}
-		obj->setAffineTransMat(mat);
+		objects[obj_idx]->setAffineTransMat(mat);
 		mat.Erase();
 	}
 
 	inf.close();
-
+	
 	draw(display_window, cam, objects, light, light_inf, near, view_angle);
 
 	exit(EXIT_SUCCESS);
