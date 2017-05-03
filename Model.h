@@ -48,6 +48,6 @@ struct hit_t {
 };
 
 struct light_t {
-	Matrix<double> position;
+	Matrix<double>* position;
 	color_t color;
 };

@@ -125,5 +125,5 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 			delete[] framebuffer[idx][i];
 		delete[] framebuffer[idx];
 	}
-	delete[] framebuffer;
+
 }

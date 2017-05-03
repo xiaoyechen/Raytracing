@@ -33,12 +33,18 @@ int main(int argc, char** argv)
 	inf >> display_window.height >> aspect_ratio;
 
 	light_t light;
-	inf >> light.position(X, 1) >> light.position(Y, 1) >> light.position(Z, 1)
+	light.position = new Matrix<double>(4, 1, 1);
+	inf >> (*light.position)(X, 1) >> (*light.position)(Y, 1) >> (*light.position)(Z, 1)
 		>> light.color.r >> light.color.g >> light.color.b;
 
 	light_t light_inf;
-	inf >> light_inf.position(X, 1) >> light_inf.position(Y, 1) >> light_inf.position(Z, 1)
+	light_inf.position = new Matrix<double>(4, 1, 0);
+	inf >> (*light_inf.position)(X, 1) >> (*light_inf.position)(Y, 1) >> (*light_inf.position)(Z, 1)
 		>> light_inf.color.r >> light_inf.color.g >> light_inf.color.b;
+	Matrix<double>* temp = light_inf.position->normalize();
+	light_inf.position = temp;
+	delete temp;
+	temp = 0;
 
 	Camera cam;
 	double cam_x, cam_y, cam_z;
@@ -60,9 +66,9 @@ int main(int argc, char** argv)
 	cam.setUPWorld(cam_x, cam_y, cam_z);
 
 	// remaining of camera setup
-	cam.setRotationAngle(TANGLE);
 	cam.buildCamera();
-
+	cam.setRotationAngle(TANGLE);
+	
 	// Initialize objects
 	unsigned obj_num;
 	inf >> obj_num;
@@ -97,10 +103,10 @@ int main(int argc, char** argv)
 		inf >> fallout;
 		objects[obj_idx]->setFallout(fallout);
 
-		Matrix<double> mat(4, 3);
+		Matrix<double> mat(4, 4);
 		for (unsigned row = 1; row <= 4; ++row)
 		{
-			for (unsigned col = 1; col <= 3; ++col)
+			for (unsigned col = 1; col <= 4; ++col)
 				inf >> mat(row, col);
 		}
 		objects[obj_idx]->setAffineTransMat(mat);

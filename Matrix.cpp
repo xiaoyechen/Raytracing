@@ -99,6 +99,18 @@ unsigned Matrix<T>::getHeight() const
 	return m_height;
 }
 
+template<class T>
+void Matrix<T>::setLength(unsigned l)
+{
+	m_length = l;
+}
+
+template<class T>
+void Matrix<T>::setHeight(unsigned h)
+{
+	m_height = h;
+}
+
 // free memory and reset pointer & h & l
 template<typename T>
 void Matrix<T>::Erase()

@@ -70,6 +70,7 @@ void Camera::setUPWorld(double x, double y, double z)
 	(*UP)(2, 1) = y;
 	(*UP)(3, 1) = z;
 	(*UP)(4, 1) = 1.0;
+	UP->setHeight(3);
 }
 
 void Camera::setMperspective(double near, double far)
@@ -130,8 +131,11 @@ void Camera::setRotationAngle(double angle)
 void Camera::buildCamera()
 {
 	n = E->subtract(*G)->normalize();
+	n->setHeight(3);
 	u = UP->multiplyCross(*n)->normalize();
 	v = n->multiplyCross(*u)->normalize();
+
+	E->setHeight(3);
 
 	(*Mv)(1, 1) = (*u)(1, 1);
 	(*Mv)(1, 2) = (*u)(2, 1);
@@ -148,6 +152,8 @@ void Camera::buildCamera()
 	(*Mv)(3, 3) = (*n)(3, 1);
 	(*Mv)(3, 4) = -(E->multiplyDot(*n));
 
+	E->setHeight(4);
+
 	(*Mv)(4, 1) = 0;
 	(*Mv)(4, 2) = 0;
 	(*Mv)(4, 3) = 0;
@@ -159,6 +165,7 @@ void Camera::buildCamera()
 void Camera::moveCamera(unsigned dir)
 {
 	Matrix<double> newPos = *E;
+	newPos.setHeight(3);
 
 	switch (dir)
 	{
@@ -189,7 +196,7 @@ void Camera::allocMemory()
 	E = new Matrix<double>(4, 1);
 	G = new Matrix<double>(4, 1);
 	UP = new Matrix<double>(4, 1);
-	Mv = new Matrix<double>(4, 4);
+	Mp = new Matrix<double>(4, 4);
 	S1 = new Matrix<double>(4, 4);
 	T1 = new Matrix<double>(4, 4);
 	S2 = new Matrix<double>(4, 4);

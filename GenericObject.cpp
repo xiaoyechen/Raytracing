@@ -34,13 +34,13 @@ GenericObject * GenericObject::makeObject(unsigned id)
 	switch (id)
 	{
 	case OBJ_PLANE:
-		return new Plane;
+		return new Plane();
 	case OBJ_SPHERE:
-		return new Sphere;
+		return new Sphere();
 	case OBJ_CYLINDER:
-		return new Cylinder;
+		return new Cylinder();
 	case OBJ_CONE:
-		return new Cone;
+		return new Cone();
 	default:
 		return nullptr;
 	}

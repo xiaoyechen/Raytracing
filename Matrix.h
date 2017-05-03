@@ -13,9 +13,11 @@ public:
 	Matrix(const Matrix<double> &mat);
 	~Matrix();
 	
-	unsigned getLength()const;
-	unsigned getHeight()const;
+	unsigned getLength() const;
+	unsigned getHeight() const;
 
+	void setLength(unsigned l);
+	void setHeight(unsigned h);
 	T& operator()(int i, int j);
 	T operator()(int i, int j) const;
 	void copy(const Matrix<double> &mat);

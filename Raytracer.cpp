@@ -41,7 +41,7 @@ Matrix<double>* projTrans(Matrix<double> &P)
 
 void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix<double> &cam, light_t &light, unsigned hit_type, double *buffer_array)
 {
-	Matrix<double> surf_to_light = *light.position.subtract(intersection)->normalize();
+	Matrix<double> surf_to_light = *light.position->subtract(intersection)->normalize();
 	Matrix<double> surf_to_cam = *cam.subtract(intersection);
 	Matrix<double> surf_normal = *obj->calculateSurfaceNormal(intersection, hit_type);
 
@@ -71,12 +71,12 @@ void calculateIntensityInfinite(GenericObject *obj, Matrix<double> &intersection
 	Matrix<double> surf_to_cam = *cam.subtract(intersection)->normalize();
 	Matrix<double> surf_normal = *obj->calculateSurfaceNormal(intersection, hit_type);
 
-	Matrix<double> light_negative = *light.position.multiplyDot(-1);
+	Matrix<double> light_negative = *light.position->multiplyDot(-1);
 	double surf_normal_mag = surf_normal.normal();
-	Matrix<double> reflection_inf = *light_negative.add(*surf_normal.multiplyDot(2 * light.position.multiplyDot(surf_normal) / (surf_normal_mag*surf_normal_mag)));
+	Matrix<double> reflection_inf = *light_negative.add(*surf_normal.multiplyDot(2 * light.position->multiplyDot(surf_normal) / (surf_normal_mag*surf_normal_mag)));
 
 	// calculate diffuse and specular intensities
-	double Id_inf = light.position.multiplyDot(surf_normal) / (surf_normal_mag*light.position.normal());
+	double Id_inf = light.position->multiplyDot(surf_normal) / (surf_normal_mag*light.position->normal());
 	double Is_inf = pow(reflection_inf.multiplyDot(surf_to_cam) / (reflection_inf.normal()*surf_to_cam.normal()), obj->getFallout());
 
 	if (Id_inf < 0) Id_inf = 0;
@@ -133,7 +133,7 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				unsigned tmin_idx = findMinHitIdx(objects);
 
 				Matrix<double> rayOnObj = *cam->getE()->add(*direction.multiplyDot(objects[tmin_idx]->getRayHit().enter));
-				Matrix<double> surface_to_light = *light.position.subtract(rayOnObj)->normalize();
+				Matrix<double> surface_to_light = *light.position->subtract(rayOnObj)->normalize();
 
 				double super_res_buffer[SUPER_RES][N_CHANNELS];
 				super_res_buffer[m][COLOR_R] = objects[tmin_idx]->getAbmient(COLOR_R);
@@ -147,7 +147,7 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				{
 					if (idx == tmin_idx) continue;
 
-					objects[idx]->setRayHit(rayOnObj, light_inf.position);
+					objects[idx]->setRayHit(rayOnObj, *light_inf.position);
 
 					if (!isinf(objects[idx]->getRayHit().enter))
 						break;
