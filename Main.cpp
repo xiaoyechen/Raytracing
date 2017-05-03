@@ -31,6 +31,7 @@ int main(int argc, char** argv)
 	window_t display_window;
 	double aspect_ratio;
 	inf >> display_window.height >> aspect_ratio;
+	display_window.width = aspect_ratio * display_window.height;
 
 	light_t light;
 	light.position = new Matrix<double>(4, 1, 1);
@@ -42,9 +43,8 @@ int main(int argc, char** argv)
 	inf >> (*light_inf.position)(X, 1) >> (*light_inf.position)(Y, 1) >> (*light_inf.position)(Z, 1)
 		>> light_inf.color.r >> light_inf.color.g >> light_inf.color.b;
 	Matrix<double>* temp = light_inf.position->normalize();
+	light_inf.position->Erase();
 	light_inf.position = temp;
-	delete temp;
-	temp = 0;
 
 	Camera cam;
 	double cam_x, cam_y, cam_z;

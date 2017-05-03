@@ -249,19 +249,25 @@ Matrix<T>* Matrix<T>::multiplyCross(Matrix<T>& matB)
 	assert((m_height == 1 || m_length == 1) && (matB.m_height == 1 || matB.m_length == 1));
 	assert(m_height == 3 && matB.m_height == 3);
 
-	Matrix<T> C = *transpose();
-	Matrix<T> D = *(matB.transpose());
+	Matrix<T>* C = transpose();
+	Matrix<T>* D = matB.transpose();
 
 	Matrix<T> E(3, 3, 0);
-	E(1, 2) = -(D(1, 3));
-	E(1, 3) = D(1, 2);
-	E(2, 1) = D(1, 3);
-	E(2, 3) = -(D(1, 1));
-	E(3, 1) = -(D(1, 2));
-	E(3, 2) = D(1, 1);
+	E(1, 2) = -(*D)(1, 3);
+	E(1, 3) = (*D)(1, 2);
+	E(2, 1) = (*D)(1, 3);
+	E(2, 3) = -(*D)(1, 1);
+	E(3, 1) = -(*D)(1, 2);
+	E(3, 2) = (*D)(1, 1);
 
-	Matrix<T>* result = (C.multiply(E))->transpose();
+	Matrix<T>* temp = C->multiply(E);
+	Matrix<T>* result = temp->transpose();
+	temp->Erase(); delete temp;
 	
+	C->Erase(); delete C;
+	D->Erase(); delete D;
+	E.Erase();
+
 	return result;
 }
 
@@ -385,7 +391,10 @@ template<typename T>
 Matrix<T>* Matrix<T>::inverse()
 {
 	double det = determinant();
-	Matrix<T>* result = (this->cofactor())->transpose();
+
+	Matrix<T>* temp = cofactor();
+	Matrix<T>* result = temp->transpose();
+	temp->Erase(); delete temp;
 
 	for (unsigned i = 1; i <= result->m_height; ++i)
 	{

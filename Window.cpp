@@ -45,7 +45,7 @@ void drawObj(Display *d, Window w, int s, int w_width, int w_height, int*** fram
 	{
 		for (unsigned col = 0; col < w_width; ++col)
 		{
-			setCurrentColorX(d, &(DefaultGC(d, s)), framebuffer[row][col][COLOR_R], framebuffer[row][col][COLOR_G], framebuffer[row][col][COLOR_B]);
+			setCurrentColorX(d, &(DefaultGC(d, s)), framebuffer[COLOR_R][row][col], framebuffer[COLOR_G][row][col], framebuffer[COLOR_B][row][col]);
 			setPixelX(d, w, s, row, col);
 		}
 	}
@@ -60,12 +60,12 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 
 	//d = initX(d, &w, &s, screen.width, screen.height);
 
-	int*** framebuffer = new int**[N_CHANNELS];
-	for (unsigned idx = 0; idx <= N_CHANNELS; ++idx)
+	int*** framebuffer = new int**[N_CHANNELS]();
+	for (unsigned idx = 0; idx < N_CHANNELS; ++idx)
 	{
-		framebuffer[idx] = new int*[screen.height];
+		framebuffer[idx] = new int*[screen.height]();
 		for (unsigned i = 0; i < screen.height; ++i)
-			framebuffer[idx][i] = new int[screen.width];
+			framebuffer[idx][i] = new int[screen.width]();
 	}
 	
 	double near_h = near*tan(M_PI / 180 * view_angle / 2.0);
@@ -119,11 +119,17 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 	// dealloc framebuffer
 	
 
-	for (unsigned idx = 0; idx <= N_CHANNELS; ++idx)
+	for (unsigned idx = 0; idx < N_CHANNELS; ++idx)
 	{
 		for (unsigned i = 0; i < screen.height; ++i)
+		{
+			//for (unsigned j = 0; j < screen.width; ++j)
+				//std::cout << framebuffer[idx][i][j] << " ";
+
+			//std::cout << "\n";
 			delete[] framebuffer[idx][i];
+		}
 		delete[] framebuffer[idx];
 	}
-
+	delete[] framebuffer;
 }

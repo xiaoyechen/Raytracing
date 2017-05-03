@@ -263,17 +263,19 @@ Plane::~Plane()
 void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 {
 	resetHit();
-	Matrix<double> direction_s = *MInverse->multiply(direction)->normalize();
-	Matrix<double> start_s = *MInverse->multiply(start);
+	Matrix<double>* temp = MInverse->multiply(direction);
+	Matrix<double>* direction_s = temp->normalize();
+	Matrix<double>* start_s = MInverse->multiply(start);
 
-	if (direction_s(Z, 1) < 0)
+	if ((*direction_s)(Z, 1) < 0)
 	{
-		rayOnObj.enter = -start_s(Z, 1) / direction_s(Z, 1);
+		rayOnObj.enter = -(*start_s)(Z, 1) / (*direction_s)(Z, 1);
 		rayOnObj.exit = rayOnObj.enter;
 	}
 
-	start_s.Erase();
-	direction_s.Erase();
+	temp->Erase(); delete temp;
+	start_s->Erase(); delete start_s;
+	direction_s->Erase(); delete direction_s;
 }
 
 Matrix<double>* Plane::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)

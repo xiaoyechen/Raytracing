@@ -41,16 +41,22 @@ Matrix<double>* projTrans(Matrix<double> &P)
 
 void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix<double> &cam, light_t &light, unsigned hit_type, double *buffer_array)
 {
-	Matrix<double> surf_to_light = *light.position->subtract(intersection)->normalize();
-	Matrix<double> surf_to_cam = *cam.subtract(intersection);
-	Matrix<double> surf_normal = *obj->calculateSurfaceNormal(intersection, hit_type);
+	Matrix<double>* temp = light.position->subtract(intersection);
+	Matrix<double>* surf_to_light = temp->normalize();
+	temp->Erase(); delete temp;
+	
+	Matrix<double>* surf_to_cam = cam.subtract(intersection);
+	Matrix<double>* surf_normal = obj->calculateSurfaceNormal(intersection, hit_type);
 
-	Matrix<double> surf_light_negative = *surf_to_light.multiplyDot(-1);
-	double surf_normal_mag = surf_normal.normal();
-	Matrix<double> reflection = *surf_light_negative.add(*surf_normal.multiplyDot(2 * surf_to_light.multiplyDot(surf_normal) / (surf_normal_mag*surf_normal_mag)));
+	Matrix<double>* surf_light_negative = surf_to_light->multiplyDot(-1);
+	double surf_normal_mag = surf_normal->normal();
 
-	double i_diffuse = surf_to_light.multiplyDot(surf_normal) / (surf_normal_mag*surf_to_light.normal());
-	double i_spec = pow(reflection.multiplyDot(surf_to_cam) / (reflection.normal()*surf_to_cam.normal()), obj->getFallout());
+	temp = surf_normal->multiplyDot(2 * surf_to_light->multiplyDot(*surf_normal) / (surf_normal_mag*surf_normal_mag));
+	Matrix<double>* reflection = surf_light_negative->add(*temp);
+	temp->Erase(); delete temp;
+
+	double i_diffuse = surf_to_light->multiplyDot(*surf_normal) / (surf_normal_mag*surf_to_light->normal());
+	double i_spec = pow(reflection->multiplyDot(*surf_to_cam) / (reflection->normal()*surf_to_cam->normal()), obj->getFallout());
 
 	if (i_diffuse < 0) i_diffuse = 0;
 	if (i_spec < 0) i_spec = 0;
@@ -59,25 +65,31 @@ void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix
 	buffer_array[COLOR_G] += light.color.g*LI*obj->getDiffuse(COLOR_G) + i_spec*obj->getSpecular(COLOR_G);
 	buffer_array[COLOR_B] += light.color.b*LI*obj->getDiffuse(COLOR_B) + i_spec*obj->getSpecular(COLOR_B);
 
-	surf_to_light.Erase();
-	surf_to_cam.Erase();
-	surf_normal.Erase();
-	surf_light_negative.Erase();
-	reflection.Erase();
+	surf_to_light->Erase(); delete surf_to_light;
+	surf_to_cam->Erase(); delete surf_to_cam;
+	surf_normal->Erase(); delete surf_normal;
+	surf_light_negative->Erase(); delete surf_light_negative;
+	reflection->Erase(); delete reflection;
 }
 
 void calculateIntensityInfinite(GenericObject *obj, Matrix<double> &intersection, Matrix<double> &cam, light_t &light, unsigned hit_type, double *buffer_array)
 {
-	Matrix<double> surf_to_cam = *cam.subtract(intersection)->normalize();
-	Matrix<double> surf_normal = *obj->calculateSurfaceNormal(intersection, hit_type);
+	Matrix<double>* temp = cam.subtract(intersection);
+	Matrix<double>* surf_to_cam = temp->normalize();
+	temp->Erase(); delete temp;
 
-	Matrix<double> light_negative = *light.position->multiplyDot(-1);
-	double surf_normal_mag = surf_normal.normal();
-	Matrix<double> reflection_inf = *light_negative.add(*surf_normal.multiplyDot(2 * light.position->multiplyDot(surf_normal) / (surf_normal_mag*surf_normal_mag)));
+	Matrix<double>* surf_normal = obj->calculateSurfaceNormal(intersection, hit_type);
+
+	Matrix<double>* light_negative = light.position->multiplyDot(-1);
+	double surf_normal_mag = surf_normal->normal();
+
+	temp = surf_normal->multiplyDot(2 * light.position->multiplyDot(*surf_normal) / (surf_normal_mag*surf_normal_mag));
+	Matrix<double>* reflection_inf = light_negative->add(*temp);
+	temp->Erase(); delete temp;
 
 	// calculate diffuse and specular intensities
-	double Id_inf = light.position->multiplyDot(surf_normal) / (surf_normal_mag*light.position->normal());
-	double Is_inf = pow(reflection_inf.multiplyDot(surf_to_cam) / (reflection_inf.normal()*surf_to_cam.normal()), obj->getFallout());
+	double Id_inf = light.position->multiplyDot(*surf_normal) / (surf_normal_mag*light.position->normal());
+	double Is_inf = pow(reflection_inf->multiplyDot(*surf_to_cam) / (reflection_inf->normal()*surf_to_cam->normal()), obj->getFallout());
 
 	if (Id_inf < 0) Id_inf = 0;
 	if (Is_inf < 0) Is_inf = 0;
@@ -86,10 +98,10 @@ void calculateIntensityInfinite(GenericObject *obj, Matrix<double> &intersection
 	buffer_array[COLOR_G] += light.color.g*LI_INF*(Id_inf*obj->getDiffuse(COLOR_G) + Id_inf*obj->getSpecular(COLOR_G));
 	buffer_array[COLOR_B] += light.color.b*LI_INF*(Id_inf*obj->getDiffuse(COLOR_B) + Id_inf*obj->getSpecular(COLOR_B));
 
-	light_negative.Erase();
-	surf_to_cam.Erase();
-	surf_normal.Erase();
-	reflection_inf.Erase();
+	light_negative->Erase(); delete light_negative;
+	surf_to_cam->Erase(); delete surf_to_cam;
+	surf_normal->Erase(); delete surf_normal;
+	reflection_inf->Erase(); delete reflection_inf;
 }
 
 // assume framebuffer[w.height][w.width][# of color channels]
@@ -122,18 +134,38 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 					vr = near_h*(2.0*(2 * row - 1) / (2.0*w.height) - 1);
 
 				//direction from camera to current pixel
-				Matrix<double> direction = *cam->getN()->multiplyDot(-near)->add(*cam->getU()->multiplyDot(uc)->add(*cam->getV()->multiplyDot(vr)));
-				direction(4, 1) = 0;
-				Matrix<double>* dir_normalized = direction.normalize();
-				direction.Erase();
+				Matrix<double>* direction = cam->getN()->multiplyDot(-near);
+				Matrix<double>* temp = cam->getU()->multiplyDot(uc);
+				Matrix<double>* temp2 = cam->getV()->multiplyDot(vr);
+				Matrix<double>* temp3 = temp->add(*temp2);
+				Matrix<double>* result = direction->add(*temp3);
+				direction->Erase(); delete direction;
+				direction = new Matrix<double>(4,1,0);
+				(*direction)(1, 1) = (*result)(1, 1);
+				(*direction)(2, 1) = (*result)(2, 1);
+				(*direction)(3, 1) = (*result)(3, 1);
+
+				temp->Erase(); delete temp;
+				temp2->Erase(); delete temp2;
+				temp3->Erase(); delete temp3;
+				result->Erase(); delete result;
+				
+				temp = direction->normalize();
+				direction->Erase(); delete direction;
+				direction = temp;
 				
 				for (auto obj = objects.begin(); obj != objects.end(); ++obj)
-					(*obj)->setRayHit(*cam->getE(), direction);
+					(*obj)->setRayHit(*cam->getE(), *direction);
 
 				unsigned tmin_idx = findMinHitIdx(objects);
-
-				Matrix<double> rayOnObj = *cam->getE()->add(*direction.multiplyDot(objects[tmin_idx]->getRayHit().enter));
-				Matrix<double> surface_to_light = *light.position->subtract(rayOnObj)->normalize();
+	
+				temp = direction->multiplyDot(objects[tmin_idx]->getRayHit().enter);
+				Matrix<double>* rayOnObj = cam->getE()->add(*temp);
+				temp->Erase(); delete temp;
+				
+				temp = light.position->subtract(*rayOnObj);
+				Matrix<double>* surface_to_light = temp->normalize();
+				temp->Erase(); delete temp;
 
 				double super_res_buffer[SUPER_RES][N_CHANNELS];
 				super_res_buffer[m][COLOR_R] = objects[tmin_idx]->getAbmient(COLOR_R);
@@ -147,27 +179,31 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				{
 					if (idx == tmin_idx) continue;
 
-					objects[idx]->setRayHit(rayOnObj, *light_inf.position);
+					objects[idx]->setRayHit(*rayOnObj, *light_inf.position);
 
 					if (!isinf(objects[idx]->getRayHit().enter))
 						break;
 				}
 
 				if (idx >= objects.size())
-					calculateIntensityInfinite(objects[tmin_idx], rayOnObj, *cam->getE(), light_inf, rayhit_type, super_res_buffer[m]);
+					calculateIntensityInfinite(objects[tmin_idx], *rayOnObj, *cam->getE(), light_inf, rayhit_type, super_res_buffer[m]);
 
 				for (idx = 0; idx < objects.size(); ++idx)
 				{
 					if (idx == tmin_idx) continue;
 
-					objects[idx]->setRayHit(rayOnObj, surface_to_light);
+					objects[idx]->setRayHit(*rayOnObj, *surface_to_light);
 
 					if (!isinf(objects[idx]->getRayHit().enter))
 						break;
 				}
 
 				if (idx >= objects.size())
-					calculateIntensity(objects[tmin_idx], rayOnObj, *cam->getE(), light, rayhit_type, super_res_buffer[m]);
+					calculateIntensity(objects[tmin_idx], *rayOnObj, *cam->getE(), light, rayhit_type, super_res_buffer[m]);
+
+				direction->Erase(); delete direction;
+				rayOnObj->Erase(); delete rayOnObj;
+				surface_to_light->Erase(); delete surface_to_light;
 
 				if (super_res_buffer[m][COLOR_R] > 1) super_res_buffer[m][COLOR_R] = 1;
 				if (super_res_buffer[m][COLOR_G] > 1) super_res_buffer[m][COLOR_G] = 1;
@@ -178,9 +214,9 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				total_color[COLOR_B] = super_res_buffer[m][COLOR_B] * SATURATION;
 			}
 
-			framebuffer[row][col][COLOR_R] = total_color[COLOR_R] / SUPER_RES;
-			framebuffer[row][col][COLOR_G] = total_color[COLOR_G] / SUPER_RES;
-			framebuffer[row][col][COLOR_B] = total_color[COLOR_B] / SUPER_RES;
+			framebuffer[COLOR_R][row][col] = total_color[COLOR_R] / SUPER_RES;
+			framebuffer[COLOR_G][row][col] = total_color[COLOR_G] / SUPER_RES;
+			framebuffer[COLOR_B][row][col] = total_color[COLOR_B] / SUPER_RES;
 		}
 	}
 }
