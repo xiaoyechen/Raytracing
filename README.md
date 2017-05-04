@@ -1,5 +1,7 @@
 # Raytracing
 
+Most of the constants are in model.h
+
 Input file format:
 	
 	window_height aspect_ratio
@@ -17,5 +19,5 @@ Input file format:
 	object1_specular_color(r g b) specular_coefficient
 	object1_ambient_color(r g b) ambient_coefficient
 	fallout_exponent
-	transformation_matrix (4 rows by 3 columns)
+	transformation_matrix (4 rows by 4 columns)
 
