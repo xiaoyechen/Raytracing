@@ -18,6 +18,17 @@ Camera::~Camera()
 	T1->Erase(); delete T1;
 	S2->Erase(); delete S2;
 	T2->Erase(); delete T2;
+	W->Erase(); delete W;
+	Mv->Erase(); delete Mv;
+	M->Erase(); delete M;
+	u->Erase(); delete u;
+	v->Erase(); delete v;
+	n->Erase(); delete n;
+	
+	rmat_left->Erase(); delete rmat_left;
+	rmat_right->Erase(); delete rmat_right;
+	rmat_up->Erase(); delete rmat_up;
+	rmat_down->Erase(); delete rmat_down;
 }
 
 Matrix<double>* Camera::getU()
@@ -183,30 +194,36 @@ void Camera::buildCamera()
 
 void Camera::moveCamera(unsigned dir)
 {
-	Matrix<double>* newPos(E);
-	newPos->setHeight(3);
+	Matrix<double>* temp = new Matrix<double>(*E);
+	temp->setHeight(3);
 
+  Matrix<double>* newPos;
+  
 	switch (dir)
 	{
 	case CAM_L:
-		newPos = rmat_left->multiply(*newPos);
+		newPos = rmat_left->multiply(*temp);
 		break;
 	case CAM_R:
-		newPos = rmat_right->multiply(*newPos);
+		newPos = rmat_right->multiply(*temp);
 		break;
 	case CAM_U:
-		newPos = rmat_up->multiply(*newPos);
+		newPos = rmat_up->multiply(*temp);
 		break;
 	case CAM_D:
-		newPos = rmat_down->multiply(*newPos);
+		newPos = rmat_down->multiply(*temp);
 		break;
 	case CAM_N:
-		newPos = newPos->subtract(*n);
+		newPos = temp->subtract(*n);
+		break;
+	case CAM_F:
+		newPos = temp->add(*n);
 		break;
 	}
 
 	setEyeWorld((*newPos)(X, 1), (*newPos)(Y, 1), (*newPos)(Z, 1));
 
+  temp->Erase(); delete temp;
 	newPos->Erase(); delete newPos;
 }
 
