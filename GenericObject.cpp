@@ -42,7 +42,7 @@ GenericObject * GenericObject::makeObject(unsigned id)
 	case OBJ_CONE:
 		return new Cone();
 	default:
-		return nullptr;
+		return NULL;
 	}
 	
 }
@@ -428,3 +428,4 @@ Matrix<double>* Cone::calculateSurfaceNormal(const Matrix<double>& intersection,
 	}
 	return surf_normal;
 }
+

@@ -1,14 +1,6 @@
 #include <iostream>
+#include <cmath>
 #include "Raytracer.h"
-
-unsigned finObjIdx(std::vector<GenericObject*> &objects, unsigned num, unsigned target_type)
-{
-	unsigned i = 0;
-	while (i < num && objects[i]->getType() != target_type)
-		++i;
-
-	return i;
-}
 
 unsigned findMinHitIdx(std::vector<GenericObject*> &objects)
 {
@@ -154,8 +146,8 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				direction->Erase(); delete direction;
 				direction = temp;
 				
-				for (auto obj = objects.begin(); obj != objects.end(); ++obj)
-					(*obj)->setRayHit(*cam->getE(), *direction);
+				for (unsigned obj_idx=0; obj_idx < objects.size(); ++obj_idx)
+					objects[obj_idx]->setRayHit(*cam->getE(), *direction);
 
 				unsigned tmin_idx = findMinHitIdx(objects);
 	

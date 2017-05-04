@@ -1,17 +1,18 @@
-//#include <X11/Xlib.h>
-//#include <X11/Xutil.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <iostream>
+#include <cstdlib>
 #include "Raytracer.h"
 #include "Window.h"
 
-/*
 Display *initX(Display *d, Window *w, int *s, int w_width, int w_height)
 {
 	d = XOpenDisplay(NULL);
 	if (d == NULL)
 	{
-		cerr << "Cannot open display" << endl;
+		std::cerr << "Cannot open display" << std::endl;
 		exit(1);
 	}
 	*s = DefaultScreen(d);
@@ -25,7 +26,7 @@ Display *initX(Display *d, Window *w, int *s, int w_width, int w_height)
 
 void setCurrentColorX(Display *d, GC *gc, unsigned r, unsigned g, unsigned b)
 {
-	XSetForground(d, *gc, r << 16 | g << 8 | b);
+	XSetForeground(d, *gc, r << 16 | g << 8 | b);
 }
 
 void setPixelX(Display *d, Window w, int s, int i, int j)
@@ -39,7 +40,7 @@ void quitX(Display *d, Window w)
 	XCloseDisplay(d);
 }
 
-void drawObj(Display *d, Window w, int s, int w_width, int w_height, int*** framebuffer)
+void drawObj(Display *d, Window w, int s, unsigned w_width, unsigned w_height, int*** framebuffer)
 {
 	for (unsigned row = 0; row < w_height; ++row)
 	{
@@ -50,15 +51,15 @@ void drawObj(Display *d, Window w, int s, int w_width, int w_height, int*** fram
 		}
 	}
 }
-*/
+
 void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, light_t &light, light_t light_inf, double near, double view_angle)
 {
-	//Display *d;
-	//Window w;
-	//XEvent e;
+	Display *d;
+	Window w;
+	XEvent e;
 	int s;
 
-	//d = initX(d, &w, &s, screen.width, screen.height);
+	d = initX(d, &w, &s, screen.width, screen.height);
 
 	int*** framebuffer = new int**[N_CHANNELS]();
 	for (unsigned idx = 0; idx < N_CHANNELS; ++idx)
@@ -71,7 +72,7 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 	double near_h = near*tan(M_PI / 180 * view_angle / 2.0);
 	
 	raytrace(screen, &cam, framebuffer, objects, light, light_inf, near, near_h);
-/*
+
 	while (true)
 	{
 		XNextEvent(d, &e);
@@ -102,7 +103,7 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 				cam.moveCamera(CAM_N); break;
 			}
 
-			raytrace(screen, framebuffer, objects, light, light_inf, near, near_h);
+			raytrace(screen, &cam, framebuffer, objects, light, light_inf, near, near_h);
 
 			XClearWindow(d, w);
 
@@ -112,7 +113,7 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 		if (e.type == ClientMessage)
 			break;
 	}
-	*/
+	
 
 	// dealloc framebuffer
 	for (unsigned idx = 0; idx < N_CHANNELS; ++idx)
@@ -129,5 +130,5 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 	}
 	delete[] framebuffer;
 
-	//quitX(d, w);
+	quitX(d, w);
 }

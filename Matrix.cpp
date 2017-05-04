@@ -1,10 +1,8 @@
 #include <assert.h>
-#include <stdlib.h>
-
+#include <cstdlib>
 #include <iostream>
 #include <math.h>
 #include "Matrix.h"
-
 
 //--------- Constructor and Destructor definition
 template<typename T>
@@ -407,10 +405,10 @@ Matrix<T>* Matrix<T>::inverse()
 template<class T2>
 std::ostream & operator<<(std::ostream & out, const Matrix<T2> &mat)
 {
-	for (unsigned i = 1; i <= m_height; ++i)
+	for (unsigned i = 1; i <= mat.getHeight(); ++i)
 	{
-		for (unsigned j = 1; j < m_length; ++j)
-			out << (*this)(i, j) << ", ";
+		for (unsigned j = 1; j < mat.getLength(); ++j)
+			out << mat(i, j) << ", ";
 		out << "\n";
 	}
 	return out;
