@@ -112,13 +112,9 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 		if (e.type == ClientMessage)
 			break;
 	}
-
-	quitX(d, w);
 	*/
 
 	// dealloc framebuffer
-	
-
 	for (unsigned idx = 0; idx < N_CHANNELS; ++idx)
 	{
 		for (unsigned i = 0; i < screen.height; ++i)
@@ -132,4 +128,6 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 		delete[] framebuffer[idx];
 	}
 	delete[] framebuffer;
+
+	//quitX(d, w);
 }

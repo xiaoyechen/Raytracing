@@ -404,8 +404,8 @@ Matrix<T>* Matrix<T>::inverse()
 	return result;
 }
 
-template<class T>
-std::ostream & operator<<(std::ostream & out, const Matrix<T> &mat)
+template<class T2>
+std::ostream & operator<<(std::ostream & out, const Matrix<T2> &mat)
 {
 	for (unsigned i = 1; i <= m_height; ++i)
 	{

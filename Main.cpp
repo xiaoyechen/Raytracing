@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cstdlib>
 #include "model.h"
 #include "Camera.h"
 #include "GenericObject.h"
@@ -18,9 +19,9 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
-	string filename = argv[1];
+	char* filename = argv[1];
 
-	ifstream inf(filename);
+	ifstream inf(filename, ifstream::in);
 
 	if (!inf)
 	{

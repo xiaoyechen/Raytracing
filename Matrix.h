@@ -23,7 +23,8 @@ public:
 	void copy(const Matrix<double> &mat);
 	void Erase();
 
-	friend std::ostream& operator<<(std::ostream& out, const Matrix<T> &mat);
+	template<typename T2>
+	friend std::ostream& operator<<(std::ostream& out, const Matrix<T2> &mat);
 
 	void identity();
 	Matrix<T>* add(const Matrix<T> &matB);
