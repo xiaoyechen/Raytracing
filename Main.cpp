@@ -121,5 +121,6 @@ int main(int argc, char** argv)
   // free allocated memory
   light.position->Erase(); delete light.position;
   light_inf.position->Erase(); delete light_inf.position;
-	exit(EXIT_SUCCESS);
+
+  exit(EXIT_SUCCESS);
 }

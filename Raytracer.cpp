@@ -31,7 +31,7 @@ Matrix<double>* projTrans(Matrix<double> &P)
 	return Q;
 }
 
-void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix<double> &cam, light_t &light, unsigned hit_type, double *buffer_array)
+void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix<double> &cam, light_t &light, unsigned hit_type, double* buffer_array)
 {
 	Matrix<double>* temp = light.position->subtract(intersection);
 	Matrix<double>* surf_to_light = temp->normalize();
@@ -50,8 +50,8 @@ void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix
 	double i_diffuse = surf_to_light->multiplyDot(*surf_normal) / (surf_normal_mag*surf_to_light->normal());
 	double i_spec = pow(reflection->multiplyDot(*surf_to_cam) / (reflection->normal()*surf_to_cam->normal()), obj->getFallout());
 
-	if (i_diffuse < 0) i_diffuse = 0;
-	if (i_spec < 0) i_spec = 0;
+	if (i_diffuse < 0 || isnan(i_diffuse)) i_diffuse = 0;
+	if (i_spec < 0 || isnan(i_spec)) i_spec = 0;
 
 	buffer_array[COLOR_R] += light.color.r*LI*obj->getDiffuse(COLOR_R) + i_spec*obj->getSpecular(COLOR_R);
 	buffer_array[COLOR_G] += light.color.g*LI*obj->getDiffuse(COLOR_G) + i_spec*obj->getSpecular(COLOR_G);
@@ -83,8 +83,8 @@ void calculateIntensityInfinite(GenericObject *obj, Matrix<double> &intersection
 	double Id_inf = light.position->multiplyDot(*surf_normal) / (surf_normal_mag*light.position->normal());
 	double Is_inf = pow(reflection_inf->multiplyDot(*surf_to_cam) / (reflection_inf->normal()*surf_to_cam->normal()), obj->getFallout());
 
-	if (Id_inf < 0) Id_inf = 0;
-	if (Is_inf < 0) Is_inf = 0;
+	if (Id_inf < 0 || isnan(Id_inf)) Id_inf = 0;
+	if (Is_inf < 0 || isnan(Is_inf)) Is_inf = 0;
 
 	buffer_array[COLOR_R] += light.color.r*LI_INF*(Id_inf*obj->getDiffuse(COLOR_R) + Id_inf*obj->getSpecular(COLOR_R));
 	buffer_array[COLOR_G] += light.color.g*LI_INF*(Id_inf*obj->getDiffuse(COLOR_G) + Id_inf*obj->getSpecular(COLOR_G));
@@ -159,10 +159,10 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				Matrix<double>* surface_to_light = temp->normalize();
 				temp->Erase(); delete temp;
 
-				double super_res_buffer[SUPER_RES][N_CHANNELS];
-				super_res_buffer[m][COLOR_R] = objects[tmin_idx]->getAbmient(COLOR_R);
-				super_res_buffer[m][COLOR_G] = objects[tmin_idx]->getAbmient(COLOR_G);
-				super_res_buffer[m][COLOR_B] = objects[tmin_idx]->getAbmient(COLOR_B);
+				double super_res_buffer[N_CHANNELS];
+				super_res_buffer[COLOR_R] = objects[tmin_idx]->getAbmient(COLOR_R);
+				super_res_buffer[COLOR_G] = objects[tmin_idx]->getAbmient(COLOR_G);
+				super_res_buffer[COLOR_B] = objects[tmin_idx]->getAbmient(COLOR_B);
 
 				unsigned rayhit_type = objects[tmin_idx]->getRayHit().enter_type;
 				
@@ -178,7 +178,7 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				}
 
 				if (idx >= objects.size())
-					calculateIntensityInfinite(objects[tmin_idx], *rayOnObj, *cam->getE(), light_inf, rayhit_type, super_res_buffer[m]);
+					calculateIntensityInfinite(objects[tmin_idx], *rayOnObj, *cam->getE(), light_inf, rayhit_type, super_res_buffer);
 
 				for (idx = 0; idx < objects.size(); ++idx)
 				{
@@ -191,19 +191,19 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				}
 
 				if (idx >= objects.size())
-					calculateIntensity(objects[tmin_idx], *rayOnObj, *cam->getE(), light, rayhit_type, super_res_buffer[m]);
+					calculateIntensity(objects[tmin_idx], *rayOnObj, *cam->getE(), light, rayhit_type, super_res_buffer);
 
 				direction->Erase(); delete direction;
 				rayOnObj->Erase(); delete rayOnObj;
 				surface_to_light->Erase(); delete surface_to_light;
 
-				if (super_res_buffer[m][COLOR_R] > 1) super_res_buffer[m][COLOR_R] = 1;
-				if (super_res_buffer[m][COLOR_G] > 1) super_res_buffer[m][COLOR_G] = 1;
-				if (super_res_buffer[m][COLOR_B] > 1) super_res_buffer[m][COLOR_B] = 1;
+				if (super_res_buffer[COLOR_R] > 1) super_res_buffer[COLOR_R] = 1;
+				if (super_res_buffer[COLOR_G] > 1) super_res_buffer[COLOR_G] = 1;
+				if (super_res_buffer[COLOR_B] > 1) super_res_buffer[COLOR_B] = 1;
 
-				total_color[COLOR_R] = super_res_buffer[m][COLOR_R] * SATURATION;
-				total_color[COLOR_G] = super_res_buffer[m][COLOR_G] * SATURATION;
-				total_color[COLOR_B] = super_res_buffer[m][COLOR_B] * SATURATION;
+				total_color[COLOR_R] += super_res_buffer[COLOR_R] * SATURATION;
+				total_color[COLOR_G] += super_res_buffer[COLOR_G] * SATURATION;
+				total_color[COLOR_B] += super_res_buffer[COLOR_B] * SATURATION;
 			}
 
 			framebuffer[COLOR_R][row][col] = total_color[COLOR_R] / SUPER_RES;

@@ -175,19 +175,23 @@ void Camera::buildCamera()
 	(*Mv)(4, 4) = 1;
 
 	M = Mp->multiply(*Mv);
-	temp = M->multiply(*T1);
+	temp = T1->multiply(*M);
 	M->Erase(); delete M;
 	M = temp;
 
-	temp = M->multiply(*S1);
+	temp = S1->multiply(*M);
 	M->Erase(); delete M;
 	M = temp;
 
-	temp = M->multiply(*T2);
+	temp = T2->multiply(*M);
 	M->Erase(); delete M;
 	M = temp;
 
-	temp = M->multiply(*S2);
+	temp = S2->multiply(*M);
+	M->Erase(); delete M;
+	M = temp;
+
+	temp = W->multiply(*M);
 	M->Erase(); delete M;
 	M = temp;
 }
@@ -219,11 +223,13 @@ void Camera::moveCamera(unsigned dir)
 	case CAM_F:
 		newPos = temp->add(*n);
 		break;
+	default:
+		newPos = temp;
 	}
 
 	setEyeWorld((*newPos)(X, 1), (*newPos)(Y, 1), (*newPos)(Z, 1));
 
-  temp->Erase(); delete temp;
+	temp->Erase(); delete temp;
 	newPos->Erase(); delete newPos;
 }
 

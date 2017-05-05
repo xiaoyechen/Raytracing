@@ -1,5 +1,5 @@
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
+//#include <X11/Xlib.h>
+//#include <X11/Xutil.h>
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <iostream>
@@ -7,7 +7,7 @@
 #include "Raytracer.h"
 #include "Window.h"
 
-Display *initX(Display *d, Window *w, int *s, int w_width, int w_height)
+/*Display *initX(Display *d, Window *w, int *s, int w_width, int w_height)
 {
 	d = XOpenDisplay(NULL);
 	if (d == NULL)
@@ -50,16 +50,16 @@ void drawObj(Display *d, Window w, int s, unsigned w_width, unsigned w_height, i
 			setPixelX(d, w, s, row, col);
 		}
 	}
-}
+}*/
 
 void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, light_t &light, light_t &light_inf, double near, double view_angle)
 {
-	Display *d;
-	Window w;
-	XEvent e;
+	//Display *d;
+	//Window w;
+	//XEvent e;
 	int s;
 
-	d = initX(d, &w, &s, screen.width, screen.height);
+	//d = initX(d, &w, &s, screen.width, screen.height);
 
 	int*** framebuffer = new int**[N_CHANNELS]();
 	for (unsigned idx = 0; idx < N_CHANNELS; ++idx)
@@ -73,7 +73,7 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 	
 	raytrace(screen, &cam, framebuffer, objects, light, light_inf, near, near_h);
 
-	while (true)
+	/*while (true)
 	{
 		XNextEvent(d, &e);
 		if (e.type == Expose)
@@ -112,7 +112,7 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 		if (e.type == ClientMessage)
 			break;
 	}
-	
+	*/
 
 	// dealloc framebuffer
 	for (unsigned idx = 0; idx < N_CHANNELS; ++idx)
@@ -129,6 +129,6 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 	}
 	delete[] framebuffer;
 
-	quitX(d, w);
+	//quitX(d, w);
 }
 

@@ -162,15 +162,18 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	resetHit();
 
 	// calculate transformed ray
-	Matrix<double> direction_s = *MInverse->multiply(direction)->normalize();
-	Matrix<double> start_s = *MInverse->multiply(start);
+	Matrix<double>* temp = MInverse->multiply(direction);
+	Matrix<double>* direction_s = temp->normalize();
+	temp->Erase(); delete temp;
+
+	Matrix<double>* start_s = MInverse->multiply(start);
 
 	//-----------for cylinder walls
 
 	//calculate discriminant of ray-cylinderwall intersection equation
-	double a = direction_s(X, 1)*direction_s(X, 1) + direction_s(Y, 1)*direction_s(Y, 1);
-	double b = start_s(X, 1) * direction_s(X, 1) + start_s(Y, 1) * direction_s(Y, 1);
-	double c = start_s(X, 1)*start_s(X, 1) + start_s(Y, 1)*start_s(X, 1) - 1;
+	double a = (*direction_s)(X, 1)*(*direction_s)(X, 1) + (*direction_s)(Y, 1)*(*direction_s)(Y, 1);
+	double b = (*start_s)(X, 1) * (*direction_s)(X, 1) + (*start_s)(Y, 1) * (*direction_s)(Y, 1);
+	double c = (*start_s)(X, 1)*(*start_s)(X, 1) + (*start_s)(Y, 1)*(*start_s)(X, 1) - 1;
 
 	double isRayHit = b*b - a*c;
 
@@ -179,16 +182,16 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	{
 		double t1 = -b / a + sqrt(isRayHit) / a,
 			t2 = -b / a - sqrt(isRayHit) / a;
-		double z1 = start_s(Z, 1) + direction_s(Z, 1) * t1,
-			   z2 = start_s(Z, 1) + direction_s(Z, 1) * t2;
+		double z1 = (*start_s)(Z, 1) + (*direction_s)(Z, 1) * t1,
+			   z2 = (*start_s)(Z, 1) + (*direction_s)(Z, 1) * t2;
 
 		// if both z1 and z2 are between -1 and 1 (inclusive),
 		// then the ray enter and exit at cylinder walls
 		if (z1 >= -1 && z1 <= 1 && z2 >= -1 && z2 <= 1)
 		{
 			setHitEnterAndExit(t1, t2);
-			start_s.Erase();
-			direction_s.Erase();
+			start_s->Erase(); delete start_s;
+			direction_s->Erase(); delete direction_s;
 			return;
 		}
 		// if only one of z1 z2 is between -1 and 1,
@@ -205,11 +208,11 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	
 	//-----------for cylinder caps
 
-	if (direction_s(Z, 1) != 0)
+	if ((*direction_s)(Z, 1) != 0)
 	{
-		double t_cap = ((direction_s(Z, 1)<0?1:-1) - start_s(Z, 1)) / direction_s(Z, 1);
-		double ray_x = start_s(X, 1) + t_cap*direction_s(X, 1);
-		double ray_y = start_s(Y, 1) + t_cap*direction_s(Y, 1);
+		double t_cap = (((*direction_s)(Z, 1)<0?1:-1) - (*start_s)(Z, 1)) / (*direction_s)(Z, 1);
+		double ray_x = (*start_s)(X, 1) + t_cap*(*direction_s)(X, 1);
+		double ray_y = (*start_s)(Y, 1) + t_cap*(*direction_s)(Y, 1);
 		if (sqrt(ray_x*ray_x + ray_y*ray_y) <= 1)
 		{
 			// check if the ray intersects cylinder cap when entering
@@ -218,19 +221,19 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 			{
 				rayOnObj.exit_type = rayOnObj.enter_type;
 				rayOnObj.exit = rayOnObj.enter;
-				rayOnObj.enter_type = direction_s(Z, 1)<0?CYLINDER_TOP:CYLINDER_BASE;
+				rayOnObj.enter_type = (*direction_s)(Z, 1)<0?CYLINDER_TOP:CYLINDER_BASE;
 				rayOnObj.enter = t_cap;
 			}
 			else 
 			{
-				rayOnObj.exit_type = direction_s(Z, 1)<0 ? CYLINDER_TOP:CYLINDER_BASE;
+				rayOnObj.exit_type = (*direction_s)(Z, 1)<0 ? CYLINDER_TOP:CYLINDER_BASE;
 				rayOnObj.exit = t_cap;
 			}
 		}
 	}
 
-	start_s.Erase();
-	direction_s.Erase();
+	start_s->Erase(); delete start_s;
+	direction_s->Erase(); delete direction_s;
 }
 
 Matrix<double>* Cylinder::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
@@ -298,13 +301,13 @@ Sphere::~Sphere()
 void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 {
 	resetHit();
-	Matrix<double> start_s = *MInverse->multiply(start);
-	Matrix<double> direction_s = *MInverse->multiply(direction);
+	Matrix<double>* start_s = MInverse->multiply(start);
+	Matrix<double>* direction_s = MInverse->multiply(direction);
 
-	double a = direction_s.normal();
+	double a = direction_s->normal();
 	a *= a;
-	double b = start_s.multiplyDot(direction_s);
-	double c = start_s.normal();
+	double b = start_s->multiplyDot(*direction_s);
+	double c = start_s->normal();
 	c *= c;
 
 	double isRayHit = b*b - a*c;
@@ -317,8 +320,8 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		setHitEnterAndExit(t1, t2);
 	}
 
-	start_s.Erase();
-	direction_s.Erase();
+	start_s->Erase(); delete start_s;
+	direction_s->Erase(); delete direction_s;
 }
 
 Matrix<double>* Sphere::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
@@ -342,14 +345,14 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 {
 	resetHit();
 
-	Matrix<double> start_s = *MInverse->multiply(start);
-	Matrix<double> direction_s = *MInverse->multiply(direction);
+	Matrix<double>* start_s = MInverse->multiply(start);
+	Matrix<double>* direction_s = MInverse->multiply(direction);
 
 	//--------for cone wall
 
-	double a = direction_s(X, 1)*direction_s(X, 1) + direction_s(Y, 1)*direction_s(Y, 1) - 0.25 * direction_s(Z, 1)*direction_s(Z, 1);
-	double b = start_s(X, 1)*direction_s(X, 1) + start_s(Y, 1)*direction_s(Y, 1) + direction_s(Z, 1)*0.25*(1 - start_s(Z, 1));
-	double c = start_s(X, 1)*start_s(X, 1) + start_s(Y, 1)*start_s(Y, 1) - 0.25*(1 - start_s(Z, 1))*(1 - start_s(Z, 1));
+	double a = (*direction_s)(X, 1)*(*direction_s)(X, 1) + (*direction_s)(Y, 1)*(*direction_s)(Y, 1) - 0.25 * (*direction_s)(Z, 1)*(*direction_s)(Z, 1);
+	double b = (*start_s)(X, 1)*(*direction_s)(X, 1) + (*start_s)(Y, 1)*(*direction_s)(Y, 1) + (*direction_s)(Z, 1)*0.25*(1 - (*start_s)(Z, 1));
+	double c = (*start_s)(X, 1)*(*start_s)(X, 1) + (*start_s)(Y, 1)*(*start_s)(Y, 1) - 0.25*(1 - (*start_s)(Z, 1))*(1 - (*start_s)(Z, 1));
 	
 	double isRayHit = b*b - a*c;
 
@@ -358,8 +361,8 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		double t1 = -b / a + sqrt(isRayHit) / a,
 			t2 = -b / a - sqrt(isRayHit) / a;
 
-		double z1 = start_s(Z, 1) + direction_s(Z, 1)*t1,
-			z2 = start_s(Z, 1) + direction_s(Z, 1)*t2;
+		double z1 = (*start_s)(Z, 1) + (*direction_s)(Z, 1)*t1,
+			z2 = (*start_s)(Z, 1) + (*direction_s)(Z, 1)*t2;
 
 		// when the ray enter & exit at cone walls,
 		// we've found both hit times
@@ -367,8 +370,8 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		{
 			setHitEnterAndExit(t1, t2);
 
-			start_s.Erase();
-			direction_s.Erase();
+			start_s->Erase(); delete start_s;
+			direction_s->Erase(); delete direction_s;
 			return;
 		}
 		// when ray enter or exit (but not both) cone wall,
@@ -383,11 +386,11 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		}
 	}
 
-	if (direction_s(Z, 1) > 0)
+	if ((*direction_s)(Z, 1) > 0)
 	{
-		double t_cap = (-1 - start_s(Z, 1)) / direction_s(Z, 1);
-		double ray_x = start_s(X, 1) + t_cap*direction_s(X, 1);
-		double ray_y = start_s(Y, 1) + t_cap*direction_s(Y, 1);
+		double t_cap = (-1 - (*start_s)(Z, 1)) / (*direction_s)(Z, 1);
+		double ray_x = (*start_s)(X, 1) + t_cap*(*direction_s)(X, 1);
+		double ray_y = (*start_s)(Y, 1) + t_cap*(*direction_s)(Y, 1);
 
 		if (sqrt(ray_x*ray_x + ray_y*ray_y) <= 1)
 		{
@@ -406,8 +409,8 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		}
 	}
 
-	start_s.Erase();
-	direction_s.Erase();
+	start_s->Erase(); delete start_s;
+	direction_s->Erase(); delete direction_s;
 }
 
 Matrix<double>* Cone::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
@@ -422,9 +425,9 @@ Matrix<double>* Cone::calculateSurfaceNormal(const Matrix<double>& intersection,
 		(*surf_normal)(X, 1) = 2 * intersection(X, 1);
 		(*surf_normal)(Y, 1) = 2 * intersection(Y, 1);
 		(*surf_normal)(Z, 1) = (1 - intersection(Z, 1)) / 2;
-		Matrix<double> result = *surf_normal->multiplyDot(coeff);
-		surf_normal->copy(result);
-		result.Erase();
+		Matrix<double>* temp = surf_normal->multiplyDot(coeff);
+		surf_normal->Erase(); delete surf_normal;
+		surf_normal = temp;
 	}
 	return surf_normal;
 }
