@@ -1,4 +1,9 @@
-# Raytracing
+# Raytracing 
+(Incomplete)
+
+Simple ray tracer program using X11 library for display
+
+Use 'make' command to compile and './Main test_input.txt' to run
 
 Most of the constants are in model.h
 
