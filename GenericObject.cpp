@@ -272,7 +272,6 @@ Plane::~Plane()
 void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 {
 	resetHit();
-
 	Matrix<double>* temp = MInverse->multiply(direction);
 	Matrix<double>* direction_s = temp->normalize();
 	Matrix<double>* start_s = MInverse->multiply(start);

@@ -7,8 +7,8 @@
 #include "Matrix.h"
 #include "Matrix.cpp"
 
-#include "Vector.h"
-#include "Vector.cpp"
+//#include "Vector.h"
+//#include "Vector.cpp"
 
 // classes for all required data types
 template class Matrix<double>;

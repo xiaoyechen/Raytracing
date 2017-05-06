@@ -12,6 +12,7 @@ public:
 	Matrix<double>* getV();
 	Matrix<double>* getN();
 	Matrix<double>* getE();
+	Matrix<double>* getM();
 	// setters
 	void setEyeWorld(double x, double y, double z);
 	void setGazeWorld(double x, double y, double z);

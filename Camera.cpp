@@ -54,6 +54,11 @@ Matrix<double>* Camera::getE()
 	return E;
 }
 
+Matrix<double>* Camera::getM()
+{
+	return M;
+}
+
 void Camera::setEyeWorld(double x, double y, double z)
 {
 	(*E)(1, 1) = x;

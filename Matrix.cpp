@@ -73,7 +73,7 @@ Matrix<T>::Matrix(int axis, double rotation_theta)
 }
 
 template<typename T>
-Matrix<T>::Matrix(const Matrix<double> &mat)
+Matrix<T>::Matrix(const Matrix<T> &mat)
 	:Matrix(mat.getHeight(), mat.getLength())
 {
 	copy(mat);
@@ -137,7 +137,7 @@ T Matrix<T>::operator()(int i, int j) const
 }
 
 template<class T>
-void Matrix<T>::copy(const Matrix<double> &mat)
+void Matrix<T>::copy(const Matrix<T> &mat)
 {
 	assert(mat.getHeight() == m_height && mat.getLength() == m_length);
 
@@ -405,9 +405,9 @@ Matrix<T>* Matrix<T>::inverse()
 	}
 	return result;
 }
-
-template<class T2>
-std::ostream & operator<<(std::ostream & out, const Matrix<T2> &mat)
+/*
+template<typename T>
+std::ostream & operator<<(std::ostream & out, const Matrix<T> &mat)
 {
 	for (unsigned i = 1; i <= mat.getHeight(); ++i)
 	{
@@ -417,3 +417,4 @@ std::ostream & operator<<(std::ostream & out, const Matrix<T2> &mat)
 	}
 	return out;
 }
+*/
