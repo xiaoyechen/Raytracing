@@ -111,6 +111,7 @@ int main(int argc, char** argv)
 				inf >> mat(row, col);
 		}
 		objects[obj_idx]->setAffineTransMat(mat);
+		
 		mat.Erase();
 	}
 

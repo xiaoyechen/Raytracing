@@ -69,7 +69,7 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 			framebuffer[idx][i] = new int[screen.width]();
 	}
 	
-	double near_h = near*tan(M_PI / 180 * view_angle / 2.0);
+	double near_h = near*tan(M_PI / 180 * view_angle *0.5);
 	
 	raytrace(screen, &cam, framebuffer, objects, light, light_inf, near, near_h);
 

@@ -31,7 +31,7 @@
 #define CAM_N 4
 #define CAM_F 5
 
-#define TANGLE 20
+#define TANGLE (20)
 #define SATURATION 255
 
 struct window_t {

@@ -31,10 +31,9 @@ private:
 		*T2, /* translation matrix that move (x,y) to positive quadrant */
 		*S2, /* scaling matrix so coord fit in display window */
 		*W, /* translate coord system so (0,0) is at top left corner of window */
-		*M,
-		*rmat_left, *rmat_right, *rmat_up, *rmat_down;
+		*M;
 	double rotate_angle;
-	void allocMemory();
 	Matrix<double>* calculateRotationalMatrix(const Matrix<double> &axis, double rangle);
+	Matrix<double>* calculateRotationalMatrix(const unsigned axis, double rangle);
 };
 

@@ -20,13 +20,10 @@ Matrix<double>* projTrans(Matrix<double> &P)
 {
 	Matrix<double>* Q = new Matrix<double>(4,1);
 
-	if (P.getLength() == 4 && P.getHeight() == 1)
-	{
-		(*Q)(1, 1) = P(1, 1) / P(4, 1);
-		(*Q)(2, 1) = P(2, 1) / P(4, 1);
-		(*Q)(3, 1) = P(3, 1) / P(4, 1);
-		(*Q)(4, 1) = 1;
-	}
+	(*Q)(1, 1) = P(1, 1) / P(4, 1);
+	(*Q)(2, 1) = P(2, 1) / P(4, 1);
+	(*Q)(3, 1) = P(3, 1) / P(4, 1);
+	(*Q)(4, 1) = 1;
 
 	return Q;
 }
@@ -104,8 +101,6 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 {
 	double near_w = near_h * (w.width / w.height);
 
-	Matrix<double> ray(4, 1);
-
 	// process each pixel on near plane
 	for (unsigned row = 0; row < w.height; ++row)
 	{
@@ -117,13 +112,13 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				// coordinates of columns & rows on near plane
 				double uc, vr;
 				if (m == 0 || m == 1)
-					uc = near_w*(2.0 * (2 * col - 1) / (2.0*w.width) - 1);
+					uc = near_w*(2.0 * (2 * (int)col - 1) / (2.0*w.width) - 1);
 				else 
-					uc = near_w*(2.0 * (2 * col + 1) / (2.0*w.width) - 1);
+					uc = near_w*(2.0 * (2 * (int)col + 1) / (2.0*w.width) - 1);
 				if (m == 1 || m == 3)
-					vr = near_h*(2.0*(2 * row + 1) / (2.0*w.height) - 1);
+					vr = near_h*(2.0*(2 * (int)row + 1) / (2.0*w.height) - 1);
 				else
-					vr = near_h*(2.0*(2 * row - 1) / (2.0*w.height) - 1);
+					vr = near_h*(2.0*(2 * (int)row - 1) / (2.0*w.height) - 1);
 
 				//direction from camera to current pixel
 				Matrix<double>* direction = cam->getN()->multiplyDot(-near);
@@ -132,6 +127,7 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				Matrix<double>* temp3 = temp->add(*temp2);
 				Matrix<double>* result = direction->add(*temp3);
 				direction->Erase(); delete direction;
+				
 				direction = new Matrix<double>(4,1,0);
 				(*direction)(1, 1) = (*result)(1, 1);
 				(*direction)(2, 1) = (*result)(2, 1);
@@ -142,9 +138,9 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				temp3->Erase(); delete temp3;
 				result->Erase(); delete result;
 				
-				temp = direction->normalize();
-				direction->Erase(); delete direction;
-				direction = temp;
+				temp = direction;
+				direction = temp->normalize();
+				temp->Erase(); delete temp;
 				
 				for (unsigned obj_idx=0; obj_idx < objects.size(); ++obj_idx)
 					objects[obj_idx]->setRayHit(*cam->getE(), *direction);

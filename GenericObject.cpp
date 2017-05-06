@@ -123,6 +123,8 @@ double GenericObject::getAbmient(unsigned channel)
 	case COLOR_R: return amb_color.r * amb_coeff;
 	case COLOR_G: return amb_color.g * amb_coeff;
 	case COLOR_B: return amb_color.b * amb_coeff;
+	default:
+		return 0;
 	}
 }
 
@@ -133,6 +135,8 @@ double GenericObject::getDiffuse(unsigned channel)
 	case COLOR_R: return diff_color.r * diff_coeff;
 	case COLOR_G: return diff_color.g * diff_coeff;
 	case COLOR_B: return diff_color.b * diff_coeff;
+	default:
+		return 0;
 	}
 }
 
@@ -143,6 +147,8 @@ double GenericObject::getSpecular(unsigned channel)
 	case COLOR_R: return spec_color.r * spec_coeff;
 	case COLOR_G: return spec_color.g * spec_coeff;
 	case COLOR_B: return spec_color.b * spec_coeff;
+	default:
+		return 0;
 	}
 }
 
@@ -173,7 +179,7 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	//calculate discriminant of ray-cylinderwall intersection equation
 	double a = (*direction_s)(X, 1)*(*direction_s)(X, 1) + (*direction_s)(Y, 1)*(*direction_s)(Y, 1);
 	double b = (*start_s)(X, 1) * (*direction_s)(X, 1) + (*start_s)(Y, 1) * (*direction_s)(Y, 1);
-	double c = (*start_s)(X, 1)*(*start_s)(X, 1) + (*start_s)(Y, 1)*(*start_s)(X, 1) - 1;
+	double c = (*start_s)(X, 1)*(*start_s)(X, 1) + (*start_s)(Y, 1)*(*start_s)(Y, 1) - 1;
 
 	double isRayHit = b*b - a*c;
 
@@ -266,11 +272,12 @@ Plane::~Plane()
 void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 {
 	resetHit();
+
 	Matrix<double>* temp = MInverse->multiply(direction);
 	Matrix<double>* direction_s = temp->normalize();
 	Matrix<double>* start_s = MInverse->multiply(start);
 
-	if ((*direction_s)(Z, 1) < 0)
+	if ((*direction_s)(Z, 1) != 0)
 	{
 		rayOnObj.enter = -(*start_s)(Z, 1) / (*direction_s)(Z, 1);
 		rayOnObj.exit = rayOnObj.enter;
@@ -301,14 +308,16 @@ Sphere::~Sphere()
 void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 {
 	resetHit();
-	Matrix<double>* start_s = MInverse->multiply(start);
-	Matrix<double>* direction_s = MInverse->multiply(direction);
 
-	double a = direction_s->normal();
-	a *= a;
+	Matrix<double>* start_s = MInverse->multiply(start);
+	
+	Matrix<double>* temp = MInverse->multiply(direction);
+	Matrix<double>* direction_s = temp->normalize();
+	temp->Erase(); delete temp;
+
+	double a = direction_s->multiplyDot(*direction_s);
 	double b = start_s->multiplyDot(*direction_s);
-	double c = start_s->normal();
-	c *= c;
+	double c = start_s->multiplyDot(*start_s) - 1;
 
 	double isRayHit = b*b - a*c;
 
@@ -329,6 +338,8 @@ Matrix<double>* Sphere::calculateSurfaceNormal(const Matrix<double>& intersectio
 	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
 
 	surf_normal->copy(intersection);
+	(*surf_normal)(4, 1) = 0;
+
 	return surf_normal;
 }
 
@@ -346,8 +357,11 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	resetHit();
 
 	Matrix<double>* start_s = MInverse->multiply(start);
-	Matrix<double>* direction_s = MInverse->multiply(direction);
-
+	
+	Matrix<double>* temp = MInverse->multiply(direction);
+	Matrix<double>* direction_s = temp->normalize();
+	temp->Erase(); delete temp;
+	
 	//--------for cone wall
 
 	double a = (*direction_s)(X, 1)*(*direction_s)(X, 1) + (*direction_s)(Y, 1)*(*direction_s)(Y, 1) - 0.25 * (*direction_s)(Z, 1)*(*direction_s)(Z, 1);

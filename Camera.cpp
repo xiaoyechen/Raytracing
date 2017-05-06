@@ -4,9 +4,17 @@
 
 Camera::Camera()
 {
-	allocMemory();
+  E = new Matrix<double>(4, 1);
+	G = new Matrix<double>(4, 1);
+	UP = new Matrix<double>(4, 1);
+	Mp = new Matrix<double>(4, 4);
+	S1 = new Matrix<double>(4, 4);
+	T1 = new Matrix<double>(4, 4);
+	S2 = new Matrix<double>(4, 4);
+	T2 = new Matrix<double>(4, 4);
+	W = new Matrix<double>(4, 4);
+	Mv = new Matrix<double>(4, 4);
 }
-
 
 Camera::~Camera()
 {
@@ -24,11 +32,6 @@ Camera::~Camera()
 	u->Erase(); delete u;
 	v->Erase(); delete v;
 	n->Erase(); delete n;
-	
-	rmat_left->Erase(); delete rmat_left;
-	rmat_right->Erase(); delete rmat_right;
-	rmat_up->Erase(); delete rmat_up;
-	rmat_down->Erase(); delete rmat_down;
 }
 
 Matrix<double>* Camera::getU()
@@ -94,7 +97,7 @@ void Camera::setTransformMatrices(double near, double angle, window_t w)
 {
 	double aspect_ratio = w.width*1.0 / w.height;
 
-	double top = near * tan((M_PI / 180) * (angle / 2));
+	double top = near * tan((M_PI / 180) * (0.5*angle));
 	double bottom = -top;
 	double right = aspect_ratio * top;
 	double left = -right;
@@ -104,12 +107,12 @@ void Camera::setTransformMatrices(double near, double angle, window_t w)
 	(*S1)(2, 2) = 2 / (top - bottom);
 
 	T1->identity();
-	(*T1)(1, 4) = -(left + right) / 2;
-	(*T1)(2, 4) = -(top + bottom) / 2;
+	(*T1)(1, 4) = -(left + right) *0.5;
+	(*T1)(2, 4) = -(top + bottom) *0.5;
 
 	S2->identity();
-	(*S2)(1, 1) = w.width / 2.0;
-	(*S2)(2, 2) = w.height / 2.0;
+	(*S2)(1, 1) = w.width *0.5;
+	(*S2)(2, 2) = w.height *0.5;
 
 	T2->identity();
 	(*T2)(1, 4) = 1;
@@ -117,38 +120,29 @@ void Camera::setTransformMatrices(double near, double angle, window_t w)
 
 	W->identity();
 	(*W)(2, 2) = -1;
-	(*W)(2, 4) = (double)(w.height);
+	(*W)(2, 4) = w.height;
 }
 
 void Camera::setRotationAngle(double angle)
 {
 	rotate_angle = angle;
-
-	// calculate all rotational matrices
-	rmat_left = calculateRotationalMatrix(*UP, -rotate_angle);
-	rmat_right = calculateRotationalMatrix(*UP, rotate_angle);
-	rmat_up = calculateRotationalMatrix(*u, -rotate_angle);
-	rmat_down = calculateRotationalMatrix(*u, rotate_angle);
 }
 
 void Camera::buildCamera()
 {
-	n = E->subtract(*G);
-	Matrix<double>* temp = n->normalize();
-	n->Erase(); delete n;
-	n = temp; 
+	Matrix<double>* temp = E->subtract(*G);
+	n = temp->normalize();
+	temp->Erase(); delete temp;
 	
 	n->setHeight(3);
 
-	u = UP->multiplyCross(*n);
-	temp = u->normalize();
-	u->Erase(); delete u;
-	u = temp;
+	temp = UP->multiplyCross(*n);
+	u = temp->normalize();
+	temp->Erase(); delete temp;
 
-	v = n->multiplyCross(*u);
-	temp = v->normalize();
-	v->Erase(); delete v;
-	v = temp;
+	temp = n->multiplyCross(*u);
+	v = temp->normalize();
+	temp->Erase(); delete temp;
 
 	E->setHeight(3);
 
@@ -174,26 +168,21 @@ void Camera::buildCamera()
 	(*Mv)(4, 3) = 0;
 	(*Mv)(4, 4) = 1;
 
-	M = Mp->multiply(*Mv);
-	temp = T1->multiply(*M);
-	M->Erase(); delete M;
-	M = temp;
+	temp = Mp->multiply(*Mv);
+	Matrix<double>* temp2 = T1->multiply(*temp);
+	temp->Erase(); delete temp;
 
-	temp = S1->multiply(*M);
-	M->Erase(); delete M;
-	M = temp;
+	temp = S1->multiply(*temp2);
+	temp2->Erase(); delete temp2;
 
-	temp = T2->multiply(*M);
-	M->Erase(); delete M;
-	M = temp;
+	temp2 = T2->multiply(*temp);
+	temp->Erase(); delete temp;
 
-	temp = S2->multiply(*M);
-	M->Erase(); delete M;
-	M = temp;
+	temp = S2->multiply(*temp2);
+	temp2->Erase(); delete temp2;
 
-	temp = W->multiply(*M);
-	M->Erase(); delete M;
-	M = temp;
+	M = W->multiply(*temp);
+	temp->Erase(); delete temp;
 }
 
 void Camera::moveCamera(unsigned dir)
@@ -206,16 +195,32 @@ void Camera::moveCamera(unsigned dir)
 	switch (dir)
 	{
 	case CAM_L:
+	  {
+	  Matrix<double>* rmat_left = calculateRotationalMatrix(Z, -rotate_angle);
 		newPos = rmat_left->multiply(*temp);
+		rmat_left->Erase(); delete rmat_left;
+		}
 		break;
 	case CAM_R:
+	{
+	  Matrix<double>* rmat_right = calculateRotationalMatrix(Z, rotate_angle);
 		newPos = rmat_right->multiply(*temp);
+		rmat_right->Erase(); delete rmat_right;
+		}
 		break;
 	case CAM_U:
+	{
+	  Matrix<double>* rmat_up = calculateRotationalMatrix(*u, -rotate_angle);
 		newPos = rmat_up->multiply(*temp);
+		rmat_up->Erase(); delete rmat_up;
+		}
 		break;
 	case CAM_D:
+	{
+	  Matrix<double>* rmat_down = calculateRotationalMatrix(*u, rotate_angle);
 		newPos = rmat_down->multiply(*temp);
+		rmat_down->Erase(); delete rmat_down;
+		}
 		break;
 	case CAM_N:
 		newPos = temp->subtract(*n);
@@ -228,23 +233,10 @@ void Camera::moveCamera(unsigned dir)
 	}
 
 	setEyeWorld((*newPos)(X, 1), (*newPos)(Y, 1), (*newPos)(Z, 1));
-
+  buildCamera();
+  
 	temp->Erase(); delete temp;
 	newPos->Erase(); delete newPos;
-}
-
-void Camera::allocMemory()
-{
-	E = new Matrix<double>(4, 1);
-	G = new Matrix<double>(4, 1);
-	UP = new Matrix<double>(4, 1);
-	Mp = new Matrix<double>(4, 4);
-	S1 = new Matrix<double>(4, 4);
-	T1 = new Matrix<double>(4, 4);
-	S2 = new Matrix<double>(4, 4);
-	T2 = new Matrix<double>(4, 4);
-	W = new Matrix<double>(4, 4);
-	Mv = new Matrix<double>(4, 4);
 }
 
 Matrix<double>* Camera::calculateRotationalMatrix(const Matrix<double> &axis, double rangle)
@@ -276,6 +268,39 @@ Matrix<double>* Camera::calculateRotationalMatrix(const Matrix<double> &axis, do
 
 	JvSq->Erase(); delete JvSq;
 	temp->Erase(); delete temp;
+
+	return rmat;
+}
+
+Matrix<double>* Camera::calculateRotationalMatrix(const unsigned axis, double rangle)
+{
+	Matrix<double>* rmat = new Matrix<double>(3, 3);
+	rmat->identity();
+	
+	double cosTheta = cos(rangle);
+	double sinTheta = sin(rangle);
+	
+	switch(axis)
+	{
+	case X:
+	  (*rmat)(Y,2) = cosTheta;
+	  (*rmat)(Y,3) = -sinTheta;
+	  (*rmat)(Z,2) = sinTheta;
+	  (*rmat)(Z,3) = cosTheta;
+	  break;
+	case Y:
+	  (*rmat)(X,1) = cosTheta;
+	  (*rmat)(X,3) = sinTheta;
+	  (*rmat)(Z,1) = -sinTheta;
+	  (*rmat)(Z,3) = cosTheta;
+	  break;
+	case Z:
+	  (*rmat)(X,1) = cosTheta;
+	  (*rmat)(X,2) = -sinTheta;
+	  (*rmat)(Y,1) = sinTheta;
+	  (*rmat)(Y,2) = cosTheta;
+	  break;
+	}
 
 	return rmat;
 }

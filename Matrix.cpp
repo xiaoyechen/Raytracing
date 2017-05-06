@@ -345,6 +345,8 @@ double Matrix<T>::determinant()
 			}
 
 			det += pow(-1.0, j1 + 1) * (*this)(1, j1) * M.determinant();
+
+			M.Erase();
 		}
 	}
 
@@ -355,14 +357,14 @@ template<typename T>
 Matrix<T>* Matrix<T>::cofactor()
 {
 	Matrix<T> *result = new Matrix<T>(m_height, m_length);
-	Matrix<T> C((m_height - 1), (m_length - 1));
+	Matrix<T> C(m_height - 1, m_length - 1);
 
 	for (unsigned i = 1; i <= m_height; ++i)
 	{
 		for (unsigned j = 1; j <= m_height; ++j)
 		{
 			unsigned j1 =1;
-			for (unsigned jj = 1; jj <= m_length; ++jj)
+			for (unsigned jj = 1; jj <= m_height; ++jj)
 			{
 				if (jj == j)
 					continue;
@@ -381,6 +383,8 @@ Matrix<T>* Matrix<T>::cofactor()
 			(*result)(i, j) = pow(-1.0, i + j + 2) * C.determinant();
 		}
 	}
+
+	C.Erase();
 
 	return result;
 }
