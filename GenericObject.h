@@ -13,7 +13,7 @@ public:
 	static GenericObject* makeObject(unsigned id);
 	virtual ~GenericObject();
 	void setType(unsigned t);
-	void setColor(unsigned color_type, double r, double g, double b);
+	void setColor(double r, double g, double b);
 	void setColorCoeff(unsigned color_type, double coeff);
 	void setFallout(double val);
 	void setAffineTransMat(Matrix<double> &mat);
@@ -22,15 +22,14 @@ public:
 	const unsigned getType();
 	const double getFallout();
 	const hit_t getRayHit();
-	double getAbmient(unsigned channel);
-	double getDiffuse(unsigned channel);
-	double getSpecular(unsigned channel);
+	color_t getColor();
+	double getCoeff(unsigned light_type);
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type)=0;
 protected:
 	GenericObject();
 	unsigned type;
 	Matrix<double>* M, *MInverse;
-	color_t color, spec_color, diff_color, amb_color;
+	color_t color;
 	double spec_coeff, diff_coeff, amb_coeff, fallout;
 	hit_t rayOnObj;
 	void setHitEnterAndExit(double hit1, double hit2);

@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "GenericObject.h"
 #include "Window.h"
+#include "Raytracer.h"
 using namespace std;
 
 #define ARG_NUM 2
@@ -83,23 +84,19 @@ int main(int argc, char** argv)
 
 		objects.push_back(GenericObject::makeObject(obj_type));
 
-		double color_r, color_g, color_b;
-		inf >> color_r >> color_g >> color_b;
-		objects[obj_idx]->setColor(COLOR_ORIGIN, color_r, color_g, color_b);
-
-		double coeff;
+		double color_r, color_g, color_b, coeff;
 		inf >> color_r >> color_g >> color_b >> coeff;
-		objects[obj_idx]->setColor(COLOR_DIFFUSE, color_r, color_g, color_b);
-		objects[obj_idx]->setColorCoeff(COLOR_DIFFUSE, coeff);
+		objects[obj_idx]->setColor(color_r, color_g, color_b);
 
-		inf >> color_r >> color_g >> color_b >> coeff;
-		objects[obj_idx]->setColor(COLOR_SPEC, color_r, color_g, color_b);
-		objects[obj_idx]->setColorCoeff(COLOR_SPEC, coeff);
-
-		inf >> color_r >> color_g >> color_b >> coeff;
-		objects[obj_idx]->setColor(COLOR_AMBIENT, color_r, color_g, color_b);
 		objects[obj_idx]->setColorCoeff(COLOR_AMBIENT, coeff);
 
+		inf >> coeff;
+		objects[obj_idx]->setColorCoeff(COLOR_DIFFUSE, coeff);
+
+		inf >> coeff;
+		objects[obj_idx]->setColorCoeff(COLOR_SPEC, coeff);
+
+		
 		double fallout;
 		inf >> fallout;
 		objects[obj_idx]->setFallout(fallout);
@@ -116,12 +113,20 @@ int main(int argc, char** argv)
 	}
 
 	inf.close();
-	
+	/*
+	Matrix<double>* Pw = new Matrix<double>(4, 1, 0);
+	(*Pw)(4, 1) = 1;
+	temp = cam.getM()->multiply(*Pw);
+	Pw->Erase(); delete Pw;
+	Matrix<double>* Pv = projTrans(*temp);
+	temp->Erase(); delete temp;
+	std::cout << *Pv;
+	Pv->Erase(); delete Pv;*/
 	draw(display_window, cam, objects, light, light_inf, near, view_angle);
 
-  // free allocated memory
-  light.position->Erase(); delete light.position;
-  light_inf.position->Erase(); delete light_inf.position;
+	// free allocated memory
+	light.position->Erase(); delete light.position;
+	light_inf.position->Erase(); delete light_inf.position;
 
-  exit(EXIT_SUCCESS);
+	exit(EXIT_SUCCESS);
 }

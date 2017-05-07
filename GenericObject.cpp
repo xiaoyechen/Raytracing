@@ -60,20 +60,9 @@ void GenericObject::setType(unsigned t)
 	type = t;
 }
 
-void GenericObject::setColor(unsigned color_type, double r, double g, double b)
+void GenericObject::setColor(double r, double g, double b)
 {
-	switch (color_type)
-	{
-	case COLOR_ORIGIN:
-		color.r = r; color.g = g; color.b = b; break;
-	case COLOR_DIFFUSE:
-		diff_color.r = r; diff_color.g = g; diff_color.b = b; break;
-	case COLOR_SPEC:
-		spec_color.r = r; spec_color.g = g; spec_color.b = b; break;
-	case COLOR_AMBIENT:
-		amb_color.r = r; amb_color.g = g; amb_color.b = b; break;
-	}
-	
+	color.r = r; color.g = g; color.b = b;
 }
 
 void GenericObject::setColorCoeff(unsigned color_type, double coeff)
@@ -116,37 +105,21 @@ const hit_t GenericObject::getRayHit()
 	return rayOnObj;
 }
 
-double GenericObject::getAbmient(unsigned channel)
+color_t GenericObject::getColor()
 {
-	switch (channel)
-	{
-	case COLOR_R: return amb_color.r * amb_coeff;
-	case COLOR_G: return amb_color.g * amb_coeff;
-	case COLOR_B: return amb_color.b * amb_coeff;
-	default:
-		return 0;
-	}
+	return color;
 }
 
-double GenericObject::getDiffuse(unsigned channel)
+double GenericObject::getCoeff(unsigned light_type)
 {
-	switch (channel)
+	switch (light_type)
 	{
-	case COLOR_R: return diff_color.r * diff_coeff;
-	case COLOR_G: return diff_color.g * diff_coeff;
-	case COLOR_B: return diff_color.b * diff_coeff;
-	default:
-		return 0;
-	}
-}
-
-double GenericObject::getSpecular(unsigned channel)
-{
-	switch (channel)
-	{
-	case COLOR_R: return spec_color.r * spec_coeff;
-	case COLOR_G: return spec_color.g * spec_coeff;
-	case COLOR_B: return spec_color.b * spec_coeff;
+	case COLOR_AMBIENT:
+		return amb_coeff;
+	case COLOR_DIFFUSE:
+		return diff_coeff;
+	case COLOR_SPEC:
+		return spec_coeff;
 	default:
 		return 0;
 	}
@@ -276,12 +249,15 @@ void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	Matrix<double>* direction_s = temp->normalize();
 	Matrix<double>* start_s = MInverse->multiply(start);
 
-	if ((*direction_s)(Z, 1) != 0)
+	if ((*direction_s)(Z, 1) < -1e-6)
 	{
 		rayOnObj.enter = -(*start_s)(Z, 1) / (*direction_s)(Z, 1);
 		rayOnObj.exit = rayOnObj.enter;
 	}
-
+	else
+	{
+		rayOnObj.enter = INFINITY;
+	}
 	temp->Erase(); delete temp;
 	start_s->Erase(); delete start_s;
 	direction_s->Erase(); delete direction_s;

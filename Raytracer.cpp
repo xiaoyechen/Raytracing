@@ -50,9 +50,9 @@ void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix
 	if (i_diffuse < 0 || isnan(i_diffuse)) i_diffuse = 0;
 	if (i_spec < 0 || isnan(i_spec)) i_spec = 0;
 
-	buffer_array[COLOR_R] += light.color.r*LI*obj->getDiffuse(COLOR_R) + i_spec*obj->getSpecular(COLOR_R);
-	buffer_array[COLOR_G] += light.color.g*LI*obj->getDiffuse(COLOR_G) + i_spec*obj->getSpecular(COLOR_G);
-	buffer_array[COLOR_B] += light.color.b*LI*obj->getDiffuse(COLOR_B) + i_spec*obj->getSpecular(COLOR_B);
+	buffer_array[COLOR_R] += light.color.r*LI *(obj->getCoeff(COLOR_DIFFUSE) * i_diffuse + i_spec*obj->getCoeff(COLOR_DIFFUSE));
+	buffer_array[COLOR_G] += light.color.g*LI *(obj->getCoeff(COLOR_DIFFUSE) * i_diffuse + i_spec*obj->getCoeff(COLOR_DIFFUSE));
+	buffer_array[COLOR_B] += light.color.b*LI *(obj->getCoeff(COLOR_DIFFUSE) * i_diffuse + i_spec*obj->getCoeff(COLOR_DIFFUSE));
 
 	surf_to_light->Erase(); delete surf_to_light;
 	surf_to_cam->Erase(); delete surf_to_cam;
@@ -83,9 +83,9 @@ void calculateIntensityInfinite(GenericObject *obj, Matrix<double> &intersection
 	if (Id_inf < 0 || isnan(Id_inf)) Id_inf = 0;
 	if (Is_inf < 0 || isnan(Is_inf)) Is_inf = 0;
 
-	buffer_array[COLOR_R] += light.color.r*LI_INF*(Id_inf*obj->getDiffuse(COLOR_R) + Id_inf*obj->getSpecular(COLOR_R));
-	buffer_array[COLOR_G] += light.color.g*LI_INF*(Id_inf*obj->getDiffuse(COLOR_G) + Id_inf*obj->getSpecular(COLOR_G));
-	buffer_array[COLOR_B] += light.color.b*LI_INF*(Id_inf*obj->getDiffuse(COLOR_B) + Id_inf*obj->getSpecular(COLOR_B));
+	buffer_array[COLOR_R] += light.color.r*LI_INF*(Id_inf*obj->getCoeff(COLOR_DIFFUSE) + Is_inf*obj->getCoeff(COLOR_SPEC));
+	buffer_array[COLOR_G] += light.color.g*LI_INF*(Id_inf*obj->getCoeff(COLOR_DIFFUSE) + Is_inf*obj->getCoeff(COLOR_SPEC));
+	buffer_array[COLOR_B] += light.color.b*LI_INF*(Id_inf*obj->getCoeff(COLOR_DIFFUSE) + Is_inf*obj->getCoeff(COLOR_SPEC));
 
 	light_negative->Erase(); delete light_negative;
 	surf_to_cam->Erase(); delete surf_to_cam;
@@ -146,26 +146,31 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 					objects[obj_idx]->setRayHit(*cam->getE(), *direction);
 
 				unsigned tmin_idx = findMinHitIdx(objects);
-	
+
+				if (isinf(objects[tmin_idx]->getRayHit().enter))
+				{
+					continue;
+				}
+				
 				temp = direction->multiplyDot(objects[tmin_idx]->getRayHit().enter);
 				Matrix<double>* rayOnObj = cam->getE()->add(*temp);
 				temp->Erase(); delete temp;
-				
+
 				temp = light.position->subtract(*rayOnObj);
 				Matrix<double>* surface_to_light = temp->normalize();
 				temp->Erase(); delete temp;
 
 				double super_res_buffer[N_CHANNELS];
+				double ambient_coeff = objects[tmin_idx]->getCoeff(COLOR_AMBIENT);
+				color_t obj_color = objects[tmin_idx]->getColor();
+				super_res_buffer[COLOR_R] = ambient_coeff * obj_color.r;
+				super_res_buffer[COLOR_G] = ambient_coeff * obj_color.g;
+				super_res_buffer[COLOR_B] = ambient_coeff * obj_color.b;
 
-				if (!isinf(objects[tmin_idx]->getRayHit().enter))
-				{
-					super_res_buffer[COLOR_R] = objects[tmin_idx]->getAbmient(COLOR_R);
-					super_res_buffer[COLOR_G] = objects[tmin_idx]->getAbmient(COLOR_G);
-					super_res_buffer[COLOR_B] = objects[tmin_idx]->getAbmient(COLOR_B);
-				}
-				
 				unsigned rayhit_type = objects[tmin_idx]->getRayHit().enter_type;
 				
+				// trace a 2nd ray from intersection to infinite light source and see if it hits an object
+				// i.e. whether current object is in shadow
 				unsigned idx = 0;
 				for (idx = 0; idx < objects.size(); ++idx)
 				{
@@ -180,6 +185,8 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				if (idx >= objects.size())
 					calculateIntensityInfinite(objects[tmin_idx], *rayOnObj, *cam->getE(), light_inf, rayhit_type, super_res_buffer);
 
+				// trace a 2nd ray from intersection to point light source and see if it hits an object
+				// i.e. whether current object is in shadow
 				for (idx = 0; idx < objects.size(); ++idx)
 				{
 					if (idx == tmin_idx) continue;

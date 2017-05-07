@@ -20,9 +20,6 @@ Input file format:
 	
 	object1_type_id
 	object1_color(r g b)
-	object1_diffuse_color(r g b) diffuse_coefficient
-	object1_specular_color(r g b) specular_coefficient
-	object1_ambient_color(r g b) ambient_coefficient
-	fallout_exponent
+	ambient_coefficient diffuse_coefficient specular_coefficient fallout_exponent
 	transformation_matrix (4 rows by 4 columns)
 
