@@ -9,6 +9,7 @@ GenericObject::GenericObject()
 
 void GenericObject::setHitEnterAndExit(double hit1, double hit2)
 {
+  if (hit1 < 0 || hit2< 0) return;
 	if (hit1 <= hit2)
 	{
 		rayOnObj.enter = hit1;
@@ -161,53 +162,61 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	{
 		double t1 = -b / a + sqrt(isRayHit) / a,
 			t2 = -b / a - sqrt(isRayHit) / a;
-		double z1 = (*start_s)(Z, 1) + (*direction_s)(Z, 1) * t1,
-			   z2 = (*start_s)(Z, 1) + (*direction_s)(Z, 1) * t2;
+			
+		if (t1>=0 && t2>=0)
+		{
+		  double z1 = (*start_s)(Z, 1) + (*direction_s)(Z, 1) * t1,
+			     z2 = (*start_s)(Z, 1) + (*direction_s)(Z, 1) * t2;
 
-		// if both z1 and z2 are between -1 and 1 (inclusive),
-		// then the ray enter and exit at cylinder walls
-		if (z1 >= -1 && z1 <= 1 && z2 >= -1 && z2 <= 1)
-		{
-			setHitEnterAndExit(t1, t2);
-			start_s->Erase(); delete start_s;
-			direction_s->Erase(); delete direction_s;
-			return;
-		}
-		// if only one of z1 z2 is between -1 and 1,
-		// then the ray only enter/exit at cylinder wall
-		else if (z1 >= -1 && z1 <= 1)
-		{
-			rayOnObj.enter = t1;
-		}
-		else if (z2 >= -1 && z2 <= 1)
-		{
-			rayOnObj.enter = t2;
+		  // if both z1 and z2 are between -1 and 1 (inclusive),
+		  // then the ray enter and exit at cylinder walls
+		  if (z1 >= -1 && z1 <= 1 && z2 >= -1 && z2 <= 1)
+		  {
+			  setHitEnterAndExit(t1, t2);
+			  start_s->Erase(); delete start_s;
+			  direction_s->Erase(); delete direction_s;
+			  return;
+		  }
+		  // if only one of z1 z2 is between -1 and 1,
+		  // then the ray only enter/exit at cylinder wall
+		  else if (z1 >= -1 && z1 <= 1)
+		  {
+			  rayOnObj.enter = t1;
+		  }
+		  else if (z2 >= -1 && z2 <= 1)
+		  {
+			  rayOnObj.enter = t2;
+		  }
 		}
 	}
 	
 	//-----------for cylinder caps
 
-	if ((*direction_s)(Z, 1) != 0)
+	if ((*direction_s)(Z, 1) < -1e-6)
 	{
 		double t_cap = (((*direction_s)(Z, 1)<0?1:-1) - (*start_s)(Z, 1)) / (*direction_s)(Z, 1);
-		double ray_x = (*start_s)(X, 1) + t_cap*(*direction_s)(X, 1);
-		double ray_y = (*start_s)(Y, 1) + t_cap*(*direction_s)(Y, 1);
-		if (sqrt(ray_x*ray_x + ray_y*ray_y) <= 1)
+		
+		if (t_cap>=0)
 		{
-			// check if the ray intersects cylinder cap when entering
-			// or exiting the cylinder object
-			if (t_cap < rayOnObj.enter)
-			{
-				rayOnObj.exit_type = rayOnObj.enter_type;
-				rayOnObj.exit = rayOnObj.enter;
-				rayOnObj.enter_type = (*direction_s)(Z, 1)<0?CYLINDER_TOP:CYLINDER_BASE;
-				rayOnObj.enter = t_cap;
-			}
-			else 
-			{
-				rayOnObj.exit_type = (*direction_s)(Z, 1)<0 ? CYLINDER_TOP:CYLINDER_BASE;
-				rayOnObj.exit = t_cap;
-			}
+		  double ray_x = (*start_s)(X, 1) + t_cap*(*direction_s)(X, 1);
+		  double ray_y = (*start_s)(Y, 1) + t_cap*(*direction_s)(Y, 1);
+		  if (sqrt(ray_x*ray_x + ray_y*ray_y) <= 1)
+		  {
+			  // check if the ray intersects cylinder cap when entering
+			  // or exiting the cylinder object
+			  if (t_cap < rayOnObj.enter)
+			  {
+				  rayOnObj.exit_type = rayOnObj.enter_type;
+				  rayOnObj.exit = rayOnObj.enter;
+				  rayOnObj.enter_type = (*direction_s)(Z, 1)<0?CYLINDER_TOP:CYLINDER_BASE;
+				  rayOnObj.enter = t_cap;
+			  }
+			  else 
+			  {
+				  rayOnObj.exit_type = (*direction_s)(Z, 1)<0 ? CYLINDER_TOP:CYLINDER_BASE;
+				  rayOnObj.exit = t_cap;
+			  }
+		  }
 		}
 	}
 
@@ -247,6 +256,7 @@ void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	resetHit();
 	Matrix<double>* temp = MInverse->multiply(direction);
 	Matrix<double>* direction_s = temp->normalize();
+	
 	Matrix<double>* start_s = MInverse->multiply(start);
 
 	if ((*direction_s)(Z, 1) < -1e-6)
@@ -254,11 +264,8 @@ void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		rayOnObj.enter = -(*start_s)(Z, 1) / (*direction_s)(Z, 1);
 		rayOnObj.exit = rayOnObj.enter;
 	}
-	else
-	{
-		rayOnObj.enter = INFINITY;
-	}
-	temp->Erase(); delete temp;
+	
+  temp->Erase(); delete temp;
 	start_s->Erase(); delete start_s;
 	direction_s->Erase(); delete direction_s;
 }
@@ -353,51 +360,58 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		double t1 = -b / a + sqrt(isRayHit) / a,
 			t2 = -b / a - sqrt(isRayHit) / a;
 
-		double z1 = (*start_s)(Z, 1) + (*direction_s)(Z, 1)*t1,
-			z2 = (*start_s)(Z, 1) + (*direction_s)(Z, 1)*t2;
+    if (t1 >= 0 && t2 >= 0)
+    {
+		  double z1 = (*start_s)(Z, 1) + (*direction_s)(Z, 1)*t1,
+			  z2 = (*start_s)(Z, 1) + (*direction_s)(Z, 1)*t2;
 
-		// when the ray enter & exit at cone walls,
-		// we've found both hit times
-		if (z1 >= -1 && z1 <= 1 && z2 >= -1 && z2 <= 1)
-		{
-			setHitEnterAndExit(t1, t2);
+		  // when the ray enter & exit at cone walls,
+		  // we've found both hit times
+		  if (z1 >= -1 && z1 <= 1 && z2 >= -1 && z2 <= 1)
+		  {
+			  setHitEnterAndExit(t1, t2);
 
-			start_s->Erase(); delete start_s;
-			direction_s->Erase(); delete direction_s;
-			return;
-		}
-		// when ray enter or exit (but not both) cone wall,
-		// need to find another hit time
-		else if (z1 >= -1 && z1 <= 1)
-		{
-			rayOnObj.enter = t1;
-		}
-		else if (z2 >= -1 && z2 <= 1)
-		{
-			rayOnObj.enter = t2;
+			  start_s->Erase(); delete start_s;
+			  direction_s->Erase(); delete direction_s;
+			  return;
+		  }
+		  // when ray enter or exit (but not both) cone wall,
+		  // need to find another hit time
+		  else if (z1 >= -1 && z1 <= 1)
+		  {
+			  rayOnObj.enter = t1;
+		  }
+		  else if (z2 >= -1 && z2 <= 1)
+		  {
+			  rayOnObj.enter = t2;
+		  }
 		}
 	}
 
-	if ((*direction_s)(Z, 1) > 0)
+	if ((*direction_s)(Z, 1) < -1e-6)
 	{
 		double t_cap = (-1 - (*start_s)(Z, 1)) / (*direction_s)(Z, 1);
-		double ray_x = (*start_s)(X, 1) + t_cap*(*direction_s)(X, 1);
-		double ray_y = (*start_s)(Y, 1) + t_cap*(*direction_s)(Y, 1);
-
-		if (sqrt(ray_x*ray_x + ray_y*ray_y) <= 1)
+		
+		if (t_cap >= 0)
 		{
-			if (t_cap < rayOnObj.enter)
-			{
-				rayOnObj.exit_type = rayOnObj.enter_type;
-				rayOnObj.exit = rayOnObj.enter;
-				rayOnObj.enter_type = CONE_BASE;
-				rayOnObj.enter = t_cap;
-			}
-			else
-			{
-				rayOnObj.exit_type = CONE_BASE;
-				rayOnObj.exit = t_cap;
-			}
+		  double ray_x = (*start_s)(X, 1) + t_cap*(*direction_s)(X, 1);
+		  double ray_y = (*start_s)(Y, 1) + t_cap*(*direction_s)(Y, 1);
+
+		  if (sqrt(ray_x*ray_x + ray_y*ray_y) <= 1)
+		  {
+			  if (t_cap < rayOnObj.enter)
+			  {
+				  rayOnObj.exit_type = rayOnObj.enter_type;
+				  rayOnObj.exit = rayOnObj.enter;
+				  rayOnObj.enter_type = CONE_BASE;
+				  rayOnObj.enter = t_cap;
+			  }
+			  else
+			  {
+				  rayOnObj.exit_type = CONE_BASE;
+				  rayOnObj.exit = t_cap;
+			  }
+		  }
 		}
 	}
 

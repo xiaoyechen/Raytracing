@@ -14,6 +14,7 @@ Camera::Camera()
 	T2 = new Matrix<double>(4, 4);
 	W = new Matrix<double>(4, 4);
 	Mv = new Matrix<double>(4, 4);
+	n = NULL;
 }
 
 Camera::~Camera()
@@ -135,6 +136,13 @@ void Camera::setRotationAngle(double angle)
 
 void Camera::buildCamera()
 {
+  if (n != NULL) 
+  {
+    n->Erase(); delete n;
+    u->Erase(); delete u;
+    v->Erase(); delete v;
+    M->Erase(); delete M;
+  }
 	Matrix<double>* temp = E->subtract(*G);
 	n = temp->normalize();
 	temp->Erase(); delete temp;
@@ -145,9 +153,7 @@ void Camera::buildCamera()
 	u = temp->normalize();
 	temp->Erase(); delete temp;
 
-	temp = n->multiplyCross(*u);
-	v = temp->normalize();
-	temp->Erase(); delete temp;
+	v = n->multiplyCross(*u);
 
 	E->setHeight(3);
 

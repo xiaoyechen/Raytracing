@@ -200,7 +200,7 @@ Matrix<T> * Matrix<T>::multiply(const Matrix<T> &matB)
 {
 	assert(m_length == matB.m_height);
 
-	Matrix<T> * result = new Matrix<T>(m_height, (matB.m_length));
+	Matrix<T> * result = new Matrix<T>(m_height, matB.m_length);
 
 	for (unsigned i = 1; i <= result->m_height; ++i)
 	{
