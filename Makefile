@@ -1,6 +1,6 @@
 CC=g++
-CFLAGS=-g -c -lm -Wall -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
-LFLAGS=-std=c++11 -g -lm -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
+CFLAGS=-std=c++11 -g -c -lm -Wall -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
+LFLAGS=-g -lm -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
 
 Main: Main.o Raytracer.o Window.o Camera.o GenericObject.o Matrix.o templates.cpp
 	$(CC) -o $@ $^ $(LFLAGS)

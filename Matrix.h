@@ -28,7 +28,7 @@ public:
 		for (unsigned i = 1; i <= mat.getHeight(); ++i)
 		{
 			for (unsigned j = 1; j <= mat.getLength(); ++j)
-				out << mat(i, j) << ", ";
+				out << mat(i, j) << " ";
 			out << "\n";
 		}
 		return out;

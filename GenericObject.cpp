@@ -314,6 +314,9 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	Matrix<double>* direction_s = temp->normalize();
 	temp->Erase(); delete temp;
 
+	start_s->setHeight(3);
+	direction_s->setHeight(3);
+
 	double a = direction_s->multiplyDot(*direction_s);
 	double b = start_s->multiplyDot(*direction_s);
 	double c = start_s->multiplyDot(*start_s) - 1;

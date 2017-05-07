@@ -102,7 +102,7 @@ void Camera::setTransformMatrices(double near, double angle, window_t w)
 {
 	double aspect_ratio = w.width*1.0 / w.height;
 
-	double top = near * tan((M_PI / 180) * (0.5*angle));
+	double top = near * tan(0.5*angle * M_PI / 180);
 	double bottom = -top;
 	double right = aspect_ratio * top;
 	double left = -right;
@@ -130,7 +130,7 @@ void Camera::setTransformMatrices(double near, double angle, window_t w)
 
 void Camera::setRotationAngle(double angle)
 {
-	rotate_angle = angle;
+	rotate_angle = angle*M_PI/180;
 }
 
 void Camera::buildCamera()
@@ -201,14 +201,14 @@ void Camera::moveCamera(unsigned dir)
 	{
 	case CAM_L:
 	  {
-	  Matrix<double>* rmat_left = calculateRotationalMatrix(Z, -rotate_angle);
+	  Matrix<double>* rmat_left = new Matrix<double>(Z, -rotate_angle);
 		newPos = rmat_left->multiply(*temp);
 		rmat_left->Erase(); delete rmat_left;
 		}
 		break;
 	case CAM_R:
 	{
-	  Matrix<double>* rmat_right = calculateRotationalMatrix(Z, rotate_angle);
+	  Matrix<double>* rmat_right = new Matrix<double>(Z, rotate_angle);
 		newPos = rmat_right->multiply(*temp);
 		rmat_right->Erase(); delete rmat_right;
 		}
@@ -244,6 +244,7 @@ void Camera::moveCamera(unsigned dir)
 	newPos->Erase(); delete newPos;
 }
 
+/* assume rangle in radian */
 Matrix<double>* Camera::calculateRotationalMatrix(const Matrix<double> &axis, double rangle)
 {
 	Matrix<double> Jv(3, 3);
@@ -277,35 +278,3 @@ Matrix<double>* Camera::calculateRotationalMatrix(const Matrix<double> &axis, do
 	return rmat;
 }
 
-Matrix<double>* Camera::calculateRotationalMatrix(const unsigned axis, double rangle)
-{
-	Matrix<double>* rmat = new Matrix<double>(3, 3);
-	rmat->identity();
-	
-	double cosTheta = cos(rangle);
-	double sinTheta = sin(rangle);
-	
-	switch(axis)
-	{
-	case X:
-	  (*rmat)(Y,2) = cosTheta;
-	  (*rmat)(Y,3) = -sinTheta;
-	  (*rmat)(Z,2) = sinTheta;
-	  (*rmat)(Z,3) = cosTheta;
-	  break;
-	case Y:
-	  (*rmat)(X,1) = cosTheta;
-	  (*rmat)(X,3) = sinTheta;
-	  (*rmat)(Z,1) = -sinTheta;
-	  (*rmat)(Z,3) = cosTheta;
-	  break;
-	case Z:
-	  (*rmat)(X,1) = cosTheta;
-	  (*rmat)(X,2) = -sinTheta;
-	  (*rmat)(Y,1) = sinTheta;
-	  (*rmat)(Y,2) = cosTheta;
-	  break;
-	}
-
-	return rmat;
-}

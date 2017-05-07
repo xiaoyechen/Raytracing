@@ -49,21 +49,21 @@ Matrix<T>::Matrix(int axis, double rotation_theta)
 	case 1: 
 		(*this)(1, 1) = 1;
 		(*this)(2, 2) = cos(rotation_theta);
-		(*this)(2, 3) = sin(rotation_theta);
-		(*this)(3, 2) = -sin(rotation_theta);
+		(*this)(2, 3) = -sin(rotation_theta);
+		(*this)(3, 2) = sin(rotation_theta);
 		(*this)(3, 3) = cos(rotation_theta);
 		break;
 	case 2:
 		(*this)(1, 1) = cos(rotation_theta);
-		(*this)(1, 3) = -sin(rotation_theta);
+		(*this)(1, 3) = sin(rotation_theta);
 		(*this)(2, 2) = 1;
-		(*this)(3, 1) = sin(rotation_theta);
+		(*this)(3, 1) = -sin(rotation_theta);
 		(*this)(3, 3) = cos(rotation_theta);
 		break;
 	case 3:
 		(*this)(1, 1) = cos(rotation_theta);
-		(*this)(1, 2) = sin(rotation_theta);
-		(*this)(2, 1) = -sin(rotation_theta);
+		(*this)(1, 2) = -sin(rotation_theta);
+		(*this)(2, 1) = sin(rotation_theta);
 		(*this)(2, 2) = cos(rotation_theta);
 		(*this)(3, 3) = 1;
 		break;

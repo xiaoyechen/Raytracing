@@ -156,10 +156,14 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				temp->Erase(); delete temp;
 
 				double super_res_buffer[N_CHANNELS];
-				super_res_buffer[COLOR_R] = objects[tmin_idx]->getAbmient(COLOR_R);
-				super_res_buffer[COLOR_G] = objects[tmin_idx]->getAbmient(COLOR_G);
-				super_res_buffer[COLOR_B] = objects[tmin_idx]->getAbmient(COLOR_B);
 
+				if (!isinf(objects[tmin_idx]->getRayHit().enter))
+				{
+					super_res_buffer[COLOR_R] = objects[tmin_idx]->getAbmient(COLOR_R);
+					super_res_buffer[COLOR_G] = objects[tmin_idx]->getAbmient(COLOR_G);
+					super_res_buffer[COLOR_B] = objects[tmin_idx]->getAbmient(COLOR_B);
+				}
+				
 				unsigned rayhit_type = objects[tmin_idx]->getRayHit().enter_type;
 				
 				unsigned idx = 0;

@@ -35,6 +35,5 @@ private:
 		*M;
 	double rotate_angle;
 	Matrix<double>* calculateRotationalMatrix(const Matrix<double> &axis, double rangle);
-	Matrix<double>* calculateRotationalMatrix(const unsigned axis, double rangle);
 };
 
