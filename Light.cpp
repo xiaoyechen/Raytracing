@@ -89,3 +89,8 @@ void DirectedLight::setPosition(double x, double y, double z)
 	position = temp;
 }
 
+double DirectedLight::calculateIntensity(Matrix<double>& intersection)
+{
+	return Light::getIntensity();
+}
+

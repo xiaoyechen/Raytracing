@@ -89,6 +89,11 @@ void GenericObject::setFallout(double val)
 	fallout = val;
 }
 
+void GenericObject::setReflect(double val)
+{
+	reflect = val;
+}
+
 void GenericObject::setAffineTransMat(Matrix<double>& mat)
 {
 	M->copy(mat);
@@ -104,6 +109,11 @@ const unsigned GenericObject::getType()
 const double GenericObject::getFallout()
 {
 	return fallout;
+}
+
+const double GenericObject::getReflect()
+{
+	return reflect;
 }
 
 const hit_t GenericObject::getRayHit()
@@ -248,10 +258,11 @@ Matrix<double>* Cylinder::calculateSurfaceNormal(const Matrix<double>& intersect
 
 	Matrix<double>* surf_normal = *M * *temp;
 	temp->Erase(); delete temp;
-
+	temp = surf_normal->normalize();
+	surf_normal->Erase(); delete surf_normal;
 	intersection_s->Erase(); delete intersection_s;
 
-	return surf_normal;
+	return temp;
 }
 
 Plane::Plane()
@@ -288,11 +299,13 @@ void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 
 Matrix<double>* Plane::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
 {
-	Matrix<double>* temp = new Matrix<double>(4, 1, 0);
+	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
 
-	(*temp)(Z, 1) = 1;
+	(*surf_normal)(Z, 1) = 1;
 
-	Matrix<double>* surf_normal = *M * *temp;
+	Matrix<double>* temp = *M * *surf_normal;
+	surf_normal->Erase(); delete surf_normal;
+	surf_normal = temp->normalize();
 	temp->Erase(); delete temp;
 
 	return surf_normal;
@@ -340,12 +353,15 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 
 Matrix<double>* Sphere::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
 {
-	Matrix<double>* temp = new Matrix<double>(4, 1, 0);
+	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
 
-	temp->copy(intersection);
-	(*temp)(4, 1) = 0;
+	surf_normal->copy(intersection);
+	(*surf_normal)(4, 1) = 0;
 
-	Matrix<double>* surf_normal = *M * *temp;
+	Matrix<double>* temp = *M * *surf_normal;
+	surf_normal->Erase(); delete surf_normal;
+	
+	surf_normal = temp->normalize();
 	temp->Erase(); delete temp;
 
 	return surf_normal;
@@ -462,8 +478,10 @@ Matrix<double>* Cone::calculateSurfaceNormal(const Matrix<double>& intersection,
 
 	Matrix<double>* surf_normal = *M * *temp;
 	temp->Erase(); delete temp;
+	temp = surf_normal->normalize();
+	surf_normal->Erase(); delete surf_normal;
 	intersection_s->Erase(); delete intersection_s;
 
-	return surf_normal;
+	return temp;
 }
 

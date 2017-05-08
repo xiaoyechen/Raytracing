@@ -16,11 +16,13 @@ public:
 	void setColor(double r, double g, double b);
 	void setColorCoeff(unsigned color_type, double coeff);
 	void setFallout(double val);
+	void setReflect(double val);
 	void setAffineTransMat(Matrix<double> &mat);
 	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction) = 0;
 	
 	const unsigned getType();
 	const double getFallout();
+	const double getReflect();
 	const hit_t getRayHit();
 	color_t getColor();
 	double getCoeff(unsigned light_type);
@@ -30,8 +32,9 @@ protected:
 	unsigned type;
 	Matrix<double>* M, *MInverse;
 	color_t color;
-	double spec_coeff, diff_coeff, amb_coeff, fallout;
+	double spec_coeff, diff_coeff, amb_coeff, fallout, reflect;
 	hit_t rayOnObj;
+
 	void setHitEnterAndExit(double hit1, double hit2);
 	void resetHit();
 };

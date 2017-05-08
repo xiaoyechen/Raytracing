@@ -35,5 +35,5 @@ public:
 	DirectedLight();
 	virtual ~DirectedLight();
 	virtual void setPosition(double x, double y, double z);
-	
+	virtual double calculateIntensity(Matrix<double> &intersection);
 };
