@@ -35,9 +35,9 @@ public:
 	}
 
 	void identity();
-	Matrix<T>* add(const Matrix<T> &matB);
-	Matrix<T>* subtract(const Matrix<T> &matB);
-	Matrix<T>* multiply(const Matrix<T> &matB);
+	Matrix<T>* operator +(const Matrix<T> &matB);
+	Matrix<T>* operator -(const Matrix<T> &matB);
+	Matrix<T>* operator *(const Matrix<T> &matB);
 	Matrix<T>* multiplyDot(T coeff);
 	T multiplyDot(const Matrix<T> &matB);
 	Matrix<T>* multiplyCross(Matrix<T> &matB);

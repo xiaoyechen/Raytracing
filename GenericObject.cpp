@@ -9,8 +9,13 @@ GenericObject::GenericObject()
 
 void GenericObject::setHitEnterAndExit(double hit1, double hit2)
 {
-  if (hit1 < 0 || hit2< 0) return;
-	if (hit1 <= hit2)
+  if (hit1 < 0 && hit2< 0) return;
+  
+  if (hit1 < 0)
+    rayOnObj.enter = hit2;
+  else if (hit2 < 0)
+    rayOnObj.enter = hit1;
+	else if (hit1 <= hit2)
 	{
 		rayOnObj.enter = hit1;
 		rayOnObj.exit = hit2;
@@ -142,11 +147,11 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	resetHit();
 
 	// calculate transformed ray
-	Matrix<double>* temp = MInverse->multiply(direction);
+	Matrix<double>* temp = *MInverse * direction;
 	Matrix<double>* direction_s = temp->normalize();
 	temp->Erase(); delete temp;
 
-	Matrix<double>* start_s = MInverse->multiply(start);
+	Matrix<double>* start_s = *MInverse * start;
 
 	//-----------for cylinder walls
 
@@ -226,18 +231,25 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 
 Matrix<double>* Cylinder::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
 {
-	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
+	Matrix<double>* intersection_s = *MInverse * intersection;
+
+	Matrix<double>* temp = new Matrix<double>(4, 1, 0);
 
 	if (hit_type == CYLINDER_BASE)
-		(*surf_normal)(Z, 1) = -1;
+		(*temp)(Z, 1) = -1;
 	else if (hit_type == CYLINDER_TOP)
-		(*surf_normal)(Z, 1) = 1;
+		(*temp)(Z, 1) = 1;
 	else
 	{
-		double denom = sqrt(intersection(X, 1)*intersection(X, 1) + intersection(Y, 1)*intersection(Y, 1));
-		(*surf_normal)(X, 1) = intersection(X, 1) / denom;
-		(*surf_normal)(Y, 1) = intersection(Y, 1) / denom;
+		double denom = sqrt((*intersection_s)(X, 1)*(*intersection_s)(X, 1) + (*intersection_s)(Y, 1)*(*intersection_s)(Y, 1));
+		(*temp)(X, 1) = (*intersection_s)(X, 1) / denom;
+		(*temp)(Y, 1) = (*intersection_s)(Y, 1) / denom;
 	}
+
+	Matrix<double>* surf_normal = *M * *temp;
+	temp->Erase(); delete temp;
+
+	intersection_s->Erase(); delete intersection_s;
 
 	return surf_normal;
 }
@@ -254,27 +266,35 @@ Plane::~Plane()
 void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 {
 	resetHit();
-	Matrix<double>* temp = MInverse->multiply(direction);
+	Matrix<double>* temp = *MInverse * direction;
 	Matrix<double>* direction_s = temp->normalize();
 	
-	Matrix<double>* start_s = MInverse->multiply(start);
+	Matrix<double>* start_s = *MInverse * start;
 
 	if ((*direction_s)(Z, 1) < -1e-6)
 	{
-		rayOnObj.enter = -(*start_s)(Z, 1) / (*direction_s)(Z, 1);
-		rayOnObj.exit = rayOnObj.enter;
+		double t = -(*start_s)(Z, 1) / (*direction_s)(Z, 1);
+		if (t >= 0)
+		{
+		  rayOnObj.enter = t;
+		  rayOnObj.exit = t;
+		}
 	}
 	
-  temp->Erase(); delete temp;
+	temp->Erase(); delete temp;
 	start_s->Erase(); delete start_s;
 	direction_s->Erase(); delete direction_s;
 }
 
 Matrix<double>* Plane::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
 {
-	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
+	Matrix<double>* temp = new Matrix<double>(4, 1, 0);
 
-	(*surf_normal)(Z, 1) = 1;
+	(*temp)(Z, 1) = 1;
+
+	Matrix<double>* surf_normal = *M * *temp;
+	temp->Erase(); delete temp;
+
 	return surf_normal;
 }
 
@@ -291,9 +311,9 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 {
 	resetHit();
 
-	Matrix<double>* start_s = MInverse->multiply(start);
+	Matrix<double>* start_s = *MInverse * start;
 	
-	Matrix<double>* temp = MInverse->multiply(direction);
+	Matrix<double>* temp = *MInverse * direction;
 	Matrix<double>* direction_s = temp->normalize();
 	temp->Erase(); delete temp;
 
@@ -320,10 +340,13 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 
 Matrix<double>* Sphere::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
 {
-	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
+	Matrix<double>* temp = new Matrix<double>(4, 1, 0);
 
-	surf_normal->copy(intersection);
-	(*surf_normal)(4, 1) = 0;
+	temp->copy(intersection);
+	(*temp)(4, 1) = 0;
+
+	Matrix<double>* surf_normal = *M * *temp;
+	temp->Erase(); delete temp;
 
 	return surf_normal;
 }
@@ -341,9 +364,9 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 {
 	resetHit();
 
-	Matrix<double>* start_s = MInverse->multiply(start);
+	Matrix<double>* start_s = *MInverse * start;
 	
-	Matrix<double>* temp = MInverse->multiply(direction);
+	Matrix<double>* temp = *MInverse * direction;
 	Matrix<double>* direction_s = temp->normalize();
 	temp->Erase(); delete temp;
 	
@@ -421,20 +444,26 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 
 Matrix<double>* Cone::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
 {
-	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
+	Matrix<double>* intersection_s = *MInverse * intersection;
+	Matrix<double>* temp = new Matrix<double>(4, 1, 0);
 
 	if (hit_type == CONE_BASE)
-		(*surf_normal)(Z, 1) = -1;
+		(*temp)(Z, 1) = -1;
 	else
 	{
-		double coeff = -1 / sqrt(2*intersection(X,1)*intersection(X,1)+2*intersection(Y,1)*intersection(Y,1)+((1-intersection(Z,1))/2)*((1 - intersection(Z, 1)) / 2));
-		(*surf_normal)(X, 1) = 2 * intersection(X, 1);
-		(*surf_normal)(Y, 1) = 2 * intersection(Y, 1);
-		(*surf_normal)(Z, 1) = (1 - intersection(Z, 1)) / 2;
-		Matrix<double>* temp = surf_normal->multiplyDot(coeff);
-		surf_normal->Erase(); delete surf_normal;
-		surf_normal = temp;
+		double coeff = -1 / sqrt(2*(*intersection_s)(X,1)*(*intersection_s)(X,1)+2* (*intersection_s)(Y,1)*(*intersection_s)(Y,1)+((1- (*intersection_s)(Z,1))/2)*((1 - (*intersection_s)(Z, 1)) / 2));
+		(*temp)(X, 1) = 2 * (*intersection_s)(X, 1);
+		(*temp)(Y, 1) = 2 * (*intersection_s)(Y, 1);
+		(*temp)(Z, 1) = (1 - (*intersection_s)(Z, 1)) / 2;
+		Matrix<double>* result = temp->multiplyDot(coeff);
+		temp->Erase(); delete temp;
+		temp = result;
 	}
+
+	Matrix<double>* surf_normal = *M * *temp;
+	temp->Erase(); delete temp;
+	intersection_s->Erase(); delete intersection_s;
+
 	return surf_normal;
 }
 

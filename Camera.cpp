@@ -143,7 +143,7 @@ void Camera::buildCamera()
     v->Erase(); delete v;
     M->Erase(); delete M;
   }
-	Matrix<double>* temp = E->subtract(*G);
+	Matrix<double>* temp = *E-*G;
 	n = temp->normalize();
 	temp->Erase(); delete temp;
 	
@@ -179,20 +179,20 @@ void Camera::buildCamera()
 	(*Mv)(4, 3) = 0;
 	(*Mv)(4, 4) = 1;
 
-	temp = Mp->multiply(*Mv);
-	Matrix<double>* temp2 = T1->multiply(*temp);
+	temp = *Mp * *Mv;
+	Matrix<double>* temp2 = *T1 * *temp;
 	temp->Erase(); delete temp;
 
-	temp = S1->multiply(*temp2);
+	temp = *S1 * *temp2;
 	temp2->Erase(); delete temp2;
 
-	temp2 = T2->multiply(*temp);
+	temp2 = *T2 * *temp;
 	temp->Erase(); delete temp;
 
-	temp = S2->multiply(*temp2);
+	temp = *S2 * *temp2;
 	temp2->Erase(); delete temp2;
 
-	M = W->multiply(*temp);
+	M = *W * *temp;
 	temp->Erase(); delete temp;
 }
 
@@ -208,36 +208,36 @@ void Camera::moveCamera(unsigned dir)
 	case CAM_L:
 	  {
 	  Matrix<double>* rmat_left = new Matrix<double>(Z, -rotate_angle);
-		newPos = rmat_left->multiply(*temp);
+		newPos = *rmat_left * *temp;
 		rmat_left->Erase(); delete rmat_left;
 		}
 		break;
 	case CAM_R:
 	{
 	  Matrix<double>* rmat_right = new Matrix<double>(Z, rotate_angle);
-		newPos = rmat_right->multiply(*temp);
+		newPos = *rmat_right * *temp;
 		rmat_right->Erase(); delete rmat_right;
 		}
 		break;
 	case CAM_U:
 	{
 	  Matrix<double>* rmat_up = calculateRotationalMatrix(*u, -rotate_angle);
-		newPos = rmat_up->multiply(*temp);
+		newPos = *rmat_up * *temp;
 		rmat_up->Erase(); delete rmat_up;
 		}
 		break;
 	case CAM_D:
 	{
 	  Matrix<double>* rmat_down = calculateRotationalMatrix(*u, rotate_angle);
-		newPos = rmat_down->multiply(*temp);
+		newPos = *rmat_down * *temp;
 		rmat_down->Erase(); delete rmat_down;
 		}
 		break;
 	case CAM_N:
-		newPos = temp->subtract(*n);
+		newPos = *temp-*n;
 		break;
 	case CAM_F:
-		newPos = temp->add(*n);
+		newPos = *temp+*n;
 		break;
 	default:
 		newPos = temp;
@@ -270,11 +270,11 @@ Matrix<double>* Camera::calculateRotationalMatrix(const Matrix<double> &axis, do
 	identity.identity();
 
 	Matrix<double>* temp = Jv.multiplyDot(sin(rangle));
-	Matrix<double>* rmat = identity.add(*temp);
+	Matrix<double>* rmat = identity+*temp;
 	temp->Erase(); delete temp;
-	Matrix<double>* JvSq = Jv.multiply(Jv);
+	Matrix<double>* JvSq = Jv*Jv;
 	temp = JvSq->multiplyDot(1 - cos(rangle));
-	Matrix<double>* result = rmat->add(*JvSq);
+	Matrix<double>* result = *rmat+*JvSq;
 	rmat->Erase(); delete rmat;
 	rmat = result;
 

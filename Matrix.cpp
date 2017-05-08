@@ -164,7 +164,7 @@ void Matrix<T>::identity()
 }
 
 template<typename T>
-Matrix<T>* Matrix<T>::add(const Matrix<T>& matB)
+Matrix<T>* Matrix<T>::operator+(const Matrix<T>& matB)
 {
 	assert(m_length == matB.m_length && m_height == matB.m_height);
 
@@ -180,7 +180,7 @@ Matrix<T>* Matrix<T>::add(const Matrix<T>& matB)
 }
 
 template<class T>
-Matrix<T>* Matrix<T>::subtract(const Matrix<T>& matB)
+Matrix<T>* Matrix<T>::operator-(const Matrix<T>& matB)
 {
 	assert(m_length == matB.m_length && m_height == matB.m_height);
 
@@ -196,7 +196,7 @@ Matrix<T>* Matrix<T>::subtract(const Matrix<T>& matB)
 }
 
 template<typename T>
-Matrix<T> * Matrix<T>::multiply(const Matrix<T> &matB)
+Matrix<T> * Matrix<T>::operator*(const Matrix<T> &matB)
 {
 	assert(m_length == matB.m_height);
 
@@ -258,7 +258,7 @@ Matrix<T>* Matrix<T>::multiplyCross(Matrix<T>& matB)
 	E(3, 1) = -(*D)(1, 2);
 	E(3, 2) = (*D)(1, 1);
 
-	Matrix<T>* temp = C->multiply(E);
+	Matrix<T>* temp = *C * E;
 	Matrix<T>* result = temp->transpose();
 	temp->Erase(); delete temp;
 	
