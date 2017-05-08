@@ -195,6 +195,19 @@ Matrix<T>* Matrix<T>::operator-(const Matrix<T>& matB)
 	return result;
 }
 
+template<class T>
+Matrix<T>* Matrix<T>::operator -()
+{
+	Matrix<T>* result = new Matrix<T>(m_height, m_length);
+	for (unsigned i = 1; i <= m_height; ++i)
+	{
+		for (unsigned j = 1; j <= m_length; ++j)
+			(*result)(i, j) = -(*this)(i, j);
+	}
+
+	return result;
+}
+
 template<typename T>
 Matrix<T> * Matrix<T>::operator*(const Matrix<T> &matB)
 {

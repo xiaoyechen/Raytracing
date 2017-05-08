@@ -52,7 +52,7 @@ void drawObj(Display *d, Window w, int s, unsigned w_width, unsigned w_height, i
 	}
 }
 
-void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, light_t &light, light_t &light_inf, double near, double view_angle)
+void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, Light &light, Light &light_inf, double near, double view_angle)
 {
 	Display *d;
 	Window w;
@@ -111,6 +111,10 @@ void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, li
 		if (e.type == ClientMessage)
 			break;
 	}
+//cam.moveCamera(CAM_N);
+//raytrace(screen, &cam, framebuffer, objects, light, light_inf, near, near_h);
+//XClearWindow(d, w);
+//drawObj(d, w, s, screen.width, screen.height, framebuffer);
 
 	// dealloc framebuffer
 	for (unsigned idx = 0; idx < N_CHANNELS; ++idx)

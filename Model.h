@@ -20,8 +20,6 @@
 #define COLOR_B 2
 
 /* Default */
-#define LI (1.0) // light intensity
-#define LI_INF (1.0)
 #define SUPER_RES 4 // super-resolution uses 4 corners of pixel
 
 #define CAM_L 0
@@ -34,6 +32,8 @@
 #define TANGLE (20)
 #define SATURATION 255
 
+#define BIAS (1e-6)
+
 struct window_t {
 	unsigned width, height;
 };
@@ -45,9 +45,4 @@ struct color_t {
 struct hit_t {
 	unsigned enter_type, exit_type;
 	double enter, exit;
-};
-
-struct light_t {
-	Matrix<double>* position;
-	color_t color;
 };

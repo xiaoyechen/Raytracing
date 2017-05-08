@@ -12,8 +12,8 @@ Most of the constants are in model.h
 Input file format:
 	
 	window_height aspect_ratio
-	light_source_position(x y z) light_source_color(r g b)
-	infinite_light_source_position(x y z) infinite_light_source_color(r g b)
+	light_source_position(x y z) light_source_color(r g b) light_source_intensity
+	infinite_light_source_position(x y z) infinite_light_source_color(r g b) light_source_intensity
 	camera_position
 	gazing_vector
 	near_plane far_plane viewing_angle

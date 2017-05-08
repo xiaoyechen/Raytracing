@@ -9,13 +9,13 @@ GenericObject::GenericObject()
 
 void GenericObject::setHitEnterAndExit(double hit1, double hit2)
 {
-  if (hit1 < 0 && hit2< 0) return;
+  if (hit1 < -BIAS && hit2< -BIAS) return;
   
-  if (hit1 < 0)
-    rayOnObj.enter = hit2;
-  else if (hit2 < 0)
-    rayOnObj.enter = hit1;
-	else if (hit1 <= hit2)
+  //if (hit1 < 0)
+  //  rayOnObj.enter = hit2;
+  //else if (hit2 < 0)
+ //   rayOnObj.enter = hit1;
+	if (hit1 <= hit2)
 	{
 		rayOnObj.enter = hit1;
 		rayOnObj.exit = hit2;
@@ -168,7 +168,7 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		double t1 = -b / a + sqrt(isRayHit) / a,
 			t2 = -b / a - sqrt(isRayHit) / a;
 			
-		if (t1>=0 && t2>=0)
+		if (t1>=-BIAS && t2>=-BIAS)
 		{
 		  double z1 = (*start_s)(Z, 1) + (*direction_s)(Z, 1) * t1,
 			     z2 = (*start_s)(Z, 1) + (*direction_s)(Z, 1) * t2;
@@ -197,7 +197,7 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	
 	//-----------for cylinder caps
 
-	if ((*direction_s)(Z, 1) < -1e-6)
+	if ((*direction_s)(Z, 1) < -BIAS)
 	{
 		double t_cap = (((*direction_s)(Z, 1)<0?1:-1) - (*start_s)(Z, 1)) / (*direction_s)(Z, 1);
 		
@@ -271,7 +271,7 @@ void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	
 	Matrix<double>* start_s = *MInverse * start;
 
-	if ((*direction_s)(Z, 1) < -1e-6)
+	if ((*direction_s)(Z, 1) < -BIAS)
 	{
 		double t = -(*start_s)(Z, 1) / (*direction_s)(Z, 1);
 		if (t >= 0)
@@ -383,7 +383,7 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		double t1 = -b / a + sqrt(isRayHit) / a,
 			t2 = -b / a - sqrt(isRayHit) / a;
 
-    if (t1 >= 0 && t2 >= 0)
+    if (t1 >= -BIAS && t2 >= -BIAS)
     {
 		  double z1 = (*start_s)(Z, 1) + (*direction_s)(Z, 1)*t1,
 			  z2 = (*start_s)(Z, 1) + (*direction_s)(Z, 1)*t2;
@@ -411,7 +411,7 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		}
 	}
 
-	if ((*direction_s)(Z, 1) < -1e-6)
+	if ((*direction_s)(Z, 1) < -BIAS)
 	{
 		double t_cap = (-1 - (*start_s)(Z, 1)) / (*direction_s)(Z, 1);
 		

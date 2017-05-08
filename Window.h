@@ -5,5 +5,5 @@
 
 void draw(window_t screen, Camera &cam, 
 	std::vector<GenericObject*> &objects, 
-	light_t &light, light_t &light_inf, 
+	Light &light, Light &light_inf, 
 	double near, double view_angle);

@@ -6,6 +6,7 @@
 #include "model.h"
 #include "Camera.h"
 #include "GenericObject.h"
+#include "Light.h"
 #include "Window.h"
 #include "Raytracer.h"
 using namespace std;
@@ -34,19 +35,21 @@ int main(int argc, char** argv)
 	double aspect_ratio;
 	inf >> display_window.height >> aspect_ratio;
 	display_window.width = aspect_ratio * display_window.height;
+	
+	double posx, posy, posz, cr, cg, cb, intensity;
+	inf >> posx >> posy >> posz >> cr >> cg >> cb >> intensity;
 
-	light_t light;
-	light.position = new Matrix<double>(4, 1, 1);
-	inf >> (*light.position)(X, 1) >> (*light.position)(Y, 1) >> (*light.position)(Z, 1)
-		>> light.color.r >> light.color.g >> light.color.b;
+	PointLight light;
+	light.setPosition(posx, posy, posz);
+	light.setColor(cr, cg, cb);
+	light.setIntensity(intensity);
 
-	light_t light_inf;
-	light_inf.position = new Matrix<double>(4, 1, 0);
-	inf >> (*light_inf.position)(X, 1) >> (*light_inf.position)(Y, 1) >> (*light_inf.position)(Z, 1)
-		>> light_inf.color.r >> light_inf.color.g >> light_inf.color.b;
-	Matrix<double>* temp = light_inf.position->normalize();
-	light_inf.position->Erase(); delete light_inf.position;
-	light_inf.position = temp;
+	DirectedLight light_inf;
+	inf >> posx >> posy >> posz >> cr >> cg >> cb >> intensity;
+
+	light_inf.setPosition(posx, posy, posz);
+	light_inf.setColor(cr, cg, cb);
+	light_inf.setIntensity(intensity);
 
 	Camera cam;
 	double cam_x, cam_y, cam_z;
@@ -123,10 +126,6 @@ int main(int argc, char** argv)
 	std::cout << *Pv;
 	Pv->Erase(); delete Pv;*/
 	draw(display_window, cam, objects, light, light_inf, near, view_angle);
-
-	// free allocated memory
-	light.position->Erase(); delete light.position;
-	light_inf.position->Erase(); delete light_inf.position;
 
 	exit(EXIT_SUCCESS);
 }

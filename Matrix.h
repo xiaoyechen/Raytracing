@@ -38,6 +38,7 @@ public:
 	Matrix<T>* operator +(const Matrix<T> &matB);
 	Matrix<T>* operator -(const Matrix<T> &matB);
 	Matrix<T>* operator *(const Matrix<T> &matB);
+	Matrix<T>* operator -();
 	Matrix<T>* multiplyDot(T coeff);
 	T multiplyDot(const Matrix<T> &matB);
 	Matrix<T>* multiplyCross(Matrix<T> &matB);
