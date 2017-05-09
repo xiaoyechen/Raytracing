@@ -100,10 +100,12 @@ int main(int argc, char** argv)
 		objects[obj_idx]->setColorCoeff(COLOR_SPEC, coeff);
 
 		
-		double fallout, reflect;
-		inf >> fallout >> reflect;
+		double fallout, reflect, refract, transparency;
+		inf >> fallout >> reflect >> refract >> transparency;
 		objects[obj_idx]->setFallout(fallout);
 		objects[obj_idx]->setReflect(reflect);
+		objects[obj_idx]->setRefract(refract);
+		objects[obj_idx]->setTransparency(transparency);
 
 		Matrix<double> mat(4, 4);
 		for (unsigned row = 1; row <= 4; ++row)

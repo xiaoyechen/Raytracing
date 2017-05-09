@@ -8,11 +8,11 @@ public:
 	~Camera();
 
 	// getters
-	Matrix<double>* getU();
-	Matrix<double>* getV();
-	Matrix<double>* getN();
-	Matrix<double>* getE();
-	Matrix<double>* getM();
+	Matrix<double>* getU() const;
+	Matrix<double>* getV() const;
+	Matrix<double>* getN() const;
+	Matrix<double>* getE() const;
+	Matrix<double>* getM() const;
 	// setters
 	void setEyeWorld(double x, double y, double z);
 	void setGazeWorld(double x, double y, double z);

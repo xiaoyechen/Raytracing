@@ -17,22 +17,26 @@ public:
 	void setColorCoeff(unsigned color_type, double coeff);
 	void setFallout(double val);
 	void setReflect(double val);
+	void setRefract(double val);
+	void setTransparency(double val);
 	void setAffineTransMat(Matrix<double> &mat);
 	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction) = 0;
 	
-	const unsigned getType();
-	const double getFallout();
-	const double getReflect();
-	const hit_t getRayHit();
-	color_t getColor();
-	double getCoeff(unsigned light_type);
+	unsigned getType() const;
+	double getFallout() const;
+	double getReflect() const;
+	double getRefract() const;
+	double getTransparency() const;
+	hit_t getRayHit() const;
+	color_t getColor() const;
+	double getCoeff(unsigned light_type) const;
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type)=0;
 protected:
 	GenericObject();
 	unsigned type;
-	Matrix<double>* M, *MInverse;
+	Matrix<double>* M, *M_i, *M_it;
 	color_t color;
-	double spec_coeff, diff_coeff, amb_coeff, fallout, reflect;
+	double spec_coeff, diff_coeff, amb_coeff, fallout, reflect, refract, transparency;
 	hit_t rayOnObj;
 
 	void setHitEnterAndExit(double hit1, double hit2);

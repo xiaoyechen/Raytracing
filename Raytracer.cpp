@@ -1,4 +1,3 @@
-#include <iostream>
 #include <cmath>
 #include "Raytracer.h"
 
@@ -17,7 +16,7 @@ color_t multiplyColor(double coeff, color_t c)
 	return result;
 }
 
-unsigned findMinHitIdx(std::vector<GenericObject*> &objects)
+unsigned findMinHitIdx(const std::vector<GenericObject*> &objects)
 {
 	if (objects.size() == 1) return 0;
 
@@ -43,7 +42,7 @@ Matrix<double>* projTrans(Matrix<double> &P)
 	return Q;
 }
 
-void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix<double> &surf_normal, Matrix<double> &surf_to_cam, Light &light, Matrix<double> &surf_to_light, color_t &shading)
+void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix<double> &surf_normal, Matrix<double> &surf_to_cam, const Light &light, Matrix<double> &surf_to_light, color_t &shading)
 {
 	Matrix<double>* surf_light_negative = -surf_to_light;
 	double surf_normal_mag = surf_normal.normal();
@@ -67,7 +66,7 @@ void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix
 	reflection->Erase(); delete reflection;
 }
 
-void calculateIntensityInfinite(GenericObject *obj, Matrix<double> &surf_norm, Matrix<double> &surf_to_cam, Light &light, color_t &shading)
+void calculateIntensityInfinite(GenericObject *obj, Matrix<double> &surf_norm, Matrix<double> &surf_to_cam, const Light &light, color_t &shading)
 {
 	Matrix<double>* light_negative = -*light.getPosition();
 	double surf_normal_mag = surf_norm.normal();
@@ -91,7 +90,7 @@ void calculateIntensityInfinite(GenericObject *obj, Matrix<double> &surf_norm, M
 	reflection_inf->Erase(); delete reflection_inf;
 }
 
-color_t shade(std::vector<GenericObject*> &objects, Matrix<double> &e, Matrix<double> &d, Light &li, Light &li_inf, int k)
+color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Matrix<double> &d, const Light &li, const Light &li_inf, int k)
 {
 	color_t shadeC;
 
@@ -158,17 +157,61 @@ color_t shade(std::vector<GenericObject*> &objects, Matrix<double> &e, Matrix<do
 		if (idx >= objects.size())
 			calculateIntensity(objects[tmin_idx], *rayOnObj, *surf_norm, *surf_to_cam, li, *surface_to_light, shadeC);
 		
-		if (k > 0 && objects[tmin_idx]->getReflect() != 0)
+		if (k > 0)
 		{
-			Matrix<double>* reflection_dir = surf_norm->multiplyDot(2 * d.multiplyDot(*surf_norm));
-			Matrix<double>* temp = d - *reflection_dir;
-			reflection_dir->Erase(); delete reflection_dir;
-			reflection_dir = temp->normalize();
-			temp->Erase(); delete temp;
+			// reflection
+			if (objects[tmin_idx]->getReflect() != 0)
+			{
+				Matrix<double>* reflection_dir = surf_norm->multiplyDot(2 * d.multiplyDot(*surf_norm));
+				Matrix<double>* temp = d - *reflection_dir;
+				reflection_dir->Erase(); delete reflection_dir;
+				reflection_dir = temp->normalize();
+				temp->Erase(); delete temp;
 
-			addColor(shadeC, multiplyColor(objects[tmin_idx]->getReflect(), shade(objects, *rayOnObj, *reflection_dir, li, li_inf, k - 1)));
+				addColor(shadeC, multiplyColor(objects[tmin_idx]->getReflect(), shade(objects, *rayOnObj, *reflection_dir, li, li_inf, k - 1)));
+				reflection_dir->Erase(); delete reflection_dir;
+			}
+			
+			// refraction
+			
+			if (objects[tmin_idx]->getTransparency() != 0)
+			{
+				double median_ratio = objects[tmin_idx]->getRefract();
 
-			reflection_dir->Erase(); delete reflection_dir;
+				// determine whether we are entering/exiting the median
+				double n_dot_d = surf_norm->multiplyDot(d);
+				Matrix<double>* refract_norm = new Matrix<double>(*surf_norm);
+				
+				if (n_dot_d < 0) // exiting
+				{
+					refract_norm->Erase(); delete refract_norm;
+					refract_norm = -*surf_norm;
+
+					median_ratio = 1 / median_ratio;
+
+					shadeC.r = 0; shadeC.g = 0; shadeC.b = 0;
+				}
+				
+				double nd = refract_norm->multiplyDot(d);
+				double refract_rate = sqrt(1 - median_ratio*median_ratio * (1 - nd*nd));
+
+				// check if refraction above threshold (90 degree)
+				// i.e. whether light is reflected internally and no refraction
+				if (refract_rate >= 0)
+				{
+					double coeff = median_ratio * nd - refract_rate;
+					temp = surf_norm->multiplyDot(coeff);
+					Matrix<double>* temp2 = d.multiplyDot(median_ratio);
+					Matrix<double>* refract_dir = *temp2 + *temp;
+					temp->Erase(); delete temp;
+					temp2->Erase(); delete temp2;
+
+					addColor(shadeC, multiplyColor(objects[tmin_idx]->getTransparency(), shade(objects, *rayOnObj, *refract_dir, li, li_inf, k - 1)));
+
+					refract_dir->Erase(); delete refract_dir;
+				}
+				refract_norm->Erase(); delete refract_norm;
+			}
 		}
 
 		surf_to_cam->Erase(); delete surf_to_cam;

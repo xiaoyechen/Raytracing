@@ -35,27 +35,27 @@ Camera::~Camera()
 	n->Erase(); delete n;
 }
 
-Matrix<double>* Camera::getU()
+Matrix<double>* Camera::getU() const
 {
 	return u;
 }
 
-Matrix<double>* Camera::getV()
+Matrix<double>* Camera::getV() const
 {
 	return v;
 }
 
-Matrix<double>* Camera::getN()
+Matrix<double>* Camera::getN() const
 {
 	return n;
 }
 
-Matrix<double>* Camera::getE()
+Matrix<double>* Camera::getE() const
 {
 	return E;
 }
 
-Matrix<double>* Camera::getM()
+Matrix<double>* Camera::getM() const
 {
 	return M;
 }

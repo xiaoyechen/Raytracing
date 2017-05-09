@@ -5,14 +5,14 @@ class Light
 {
 public:
 	Light();
-	color_t getColor();
-	Matrix<double>* getPosition();
-	double getIntensity();
+	color_t getColor() const;
+	Matrix<double>* getPosition() const;
+	double getIntensity() const;
 	virtual void setPosition(double x, double y, double z);
 	void setIntensity(double it);
 	void setColor(double r, double g, double b);
 	virtual ~Light();
-	virtual double calculateIntensity(Matrix<double> &intersection) = 0;
+	virtual double calculateIntensity(Matrix<double> &intersection) const = 0;
 
 protected:
 	Matrix<double>* position;
@@ -26,7 +26,7 @@ public:
 	PointLight();
 	virtual ~PointLight();
 	virtual void setPosition(double x, double y, double z);
-	virtual double calculateIntensity(Matrix<double> &intersection);
+	virtual double calculateIntensity(Matrix<double> &intersection) const;
 };
 
 class DirectedLight : public Light
@@ -35,5 +35,5 @@ public:
 	DirectedLight();
 	virtual ~DirectedLight();
 	virtual void setPosition(double x, double y, double z);
-	virtual double calculateIntensity(Matrix<double> &intersection);
+	virtual double calculateIntensity(Matrix<double> &intersection) const;
 };

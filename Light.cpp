@@ -7,17 +7,17 @@ Light::Light()
 	position = new Matrix<double>(4, 1);
 }
 
-color_t Light::getColor()
+color_t Light::getColor() const
 {
 	return color;
 }
 
-Matrix<double>* Light::getPosition()
+Matrix<double>* Light::getPosition() const
 {
 	return position;
 }
 
-double Light::getIntensity()
+double Light::getIntensity() const
 {
 	return intensity;
 }
@@ -60,7 +60,7 @@ void PointLight::setPosition(double x, double y, double z)
 	(*position)(4, 1) = 1;
 }
 
-double PointLight::calculateIntensity(Matrix<double> &intersection)
+double PointLight::calculateIntensity(Matrix<double> &intersection) const
 {
 	Matrix<double>* intersection_to_light = *position - intersection;
 	
@@ -89,7 +89,7 @@ void DirectedLight::setPosition(double x, double y, double z)
 	position = temp;
 }
 
-double DirectedLight::calculateIntensity(Matrix<double>& intersection)
+double DirectedLight::calculateIntensity(Matrix<double>& intersection) const
 {
 	return Light::getIntensity();
 }
