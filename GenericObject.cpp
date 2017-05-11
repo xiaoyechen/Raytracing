@@ -501,7 +501,7 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 
 	if ((*direction_s)(Z, 1) != 0)
 	{
-		double t_cap = (((*direction_s)(Z, 1)<0?1:-1) - (*start_s)(Z, 1)) / (*direction_s)(Z, 1);
+		double t_cap = (-1 - (*start_s)(Z, 1)) / (*direction_s)(Z, 1);
 		
 		if (t_cap >= 0)
 		{
