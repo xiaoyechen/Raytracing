@@ -55,10 +55,10 @@ double GenericObject::calculateRealT(double t, Matrix<double>& e, Matrix<double>
 	Matrix<double>* dt_real = *hitpoint_real - e;
 	real_t = (*dt_real)(Z, 1) / d(Z, 1);
 
-	dt->Erase();
-	hitpoint->Erase();
-	hitpoint_real->Erase();
-	dt_real->Erase();
+	dt->Erase(); delete dt;
+	hitpoint->Erase(); delete hitpoint;
+	hitpoint_real->Erase(); delete hitpoint_real;
+	dt_real->Erase(); delete dt_real;
 
 	return real_t;
 }
@@ -357,8 +357,10 @@ Matrix<double>* Plane::calculateSurfaceNormal(const Matrix<double>& intersection
 
 	(*surf_normal)(Z, 1) = 1;
 
-	Matrix<double>* temp = *M * *surf_normal;
+	Matrix<double>* temp = *M_it * *surf_normal;
 	surf_normal->Erase(); delete surf_normal;
+	
+	(*temp)(4, 1) = 0;
 	surf_normal = temp->normalize();
 	temp->Erase(); delete temp;
 
