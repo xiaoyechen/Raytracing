@@ -48,6 +48,7 @@ public:
 	double determinant();
 	Matrix<T>* cofactor();
 	Matrix<T>* inverse();
+	bool isIden();
 
 private:
 	unsigned m_length, m_height;

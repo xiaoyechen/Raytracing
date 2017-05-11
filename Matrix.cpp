@@ -393,7 +393,7 @@ Matrix<T>* Matrix<T>::cofactor()
 				++j1;
 			}
 
-			(*result)(i, j) = pow(-1.0, i + j + 2) * C.determinant();
+			(*result)(j, i) = pow(-1.0, i + j + 2) * C.determinant();
 		}
 	}
 
@@ -417,6 +417,26 @@ Matrix<T>* Matrix<T>::inverse()
 			(*result)(i, j) /= det;
 	}
 	return result;
+}
+
+template<class T>
+bool Matrix<T>::isIden()
+{
+	for (unsigned i = 1; i <= m_height; ++i)
+	{
+		for (unsigned j = 1; j <= m_length; ++j)
+		{
+			if (i == j)
+			{
+				if ((*this)(i, j) != 1) return false;
+			}
+			else if((*this)(i, j) != 0)
+			{
+				return false;
+			}
+		}
+	}
+	return true;
 }
 /*
 template<typename T>

@@ -41,6 +41,7 @@ protected:
 
 	void setHitEnterAndExit(double hit1, double hit2);
 	void resetHit();
+	double calculateRealT(double t, Matrix<double> &e, Matrix<double> &e_s, Matrix<double> &d, Matrix<double> &d_s);
 };
 
 class Sphere : public GenericObject

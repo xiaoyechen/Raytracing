@@ -16,11 +16,11 @@ void GenericObject::setHitEnterAndExit(double hit1, double hit2)
 {
   if (hit1 < -BIAS && hit2< -BIAS) return;
   
-  //if (hit1 < 0)
-  //  rayOnObj.enter = hit2;
-  //else if (hit2 < 0)
- //   rayOnObj.enter = hit1;
-	if (hit1 <= hit2)
+	//if (hit1 < -BIAS)
+	//	rayOnObj.enter = hit2;
+	//else if (hit2 < -BIAS)
+	//	rayOnObj.enter = hit1;
+	else if (hit1 <= hit2)
 	{
 		rayOnObj.enter = hit1;
 		rayOnObj.exit = hit2;
@@ -39,6 +39,30 @@ void GenericObject::resetHit()
 	rayOnObj.exit_type = type;
 }
 
+double GenericObject::calculateRealT(double t, Matrix<double>& e, Matrix<double>& e_s, Matrix<double>& d, Matrix<double>& d_s)
+{
+	if (M->isIden()) return t;
+
+	double real_t = t;
+
+	Matrix<double>* dt = d_s.multiplyDot(t);
+	Matrix<double>* hitpoint = e_s + *dt;
+
+	// transform the hit point to world space
+	Matrix<double>* hitpoint_real = *M * *hitpoint;
+
+	// compute the actual t
+	Matrix<double>* dt_real = *hitpoint_real - e;
+	real_t = (*dt_real)(Z, 1) / d(Z, 1);
+
+	dt->Erase();
+	hitpoint->Erase();
+	hitpoint_real->Erase();
+	dt_real->Erase();
+
+	return real_t;
+}
+
 
 GenericObject * GenericObject::makeObject(unsigned id)
 {
@@ -55,7 +79,6 @@ GenericObject * GenericObject::makeObject(unsigned id)
 	default:
 		return NULL;
 	}
-	
 }
 
 GenericObject::~GenericObject()
@@ -203,14 +226,18 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 			
 		if (t1>=-BIAS && t2>=-BIAS)
 		{
-		  double z1 = (*start_s)(Z, 1) + (*direction_s)(Z, 1) * t1,
+			double z1 = (*start_s)(Z, 1) + (*direction_s)(Z, 1) * t1,
 			     z2 = (*start_s)(Z, 1) + (*direction_s)(Z, 1) * t2;
+
+		  t1 = calculateRealT(t1, start, *start_s, direction, *direction_s);
+			t2 = calculateRealT(t2, start, *start_s, direction, *direction_s);
 
 		  // if both z1 and z2 are between -1 and 1 (inclusive),
 		  // then the ray enter and exit at cylinder walls
 		  if (z1 >= -1 && z1 <= 1 && z2 >= -1 && z2 <= 1)
 		  {
 			  setHitEnterAndExit(t1, t2);
+
 			  start_s->Erase(); delete start_s;
 			  direction_s->Erase(); delete direction_s;
 			  return;
@@ -240,6 +267,8 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		  double ray_y = (*start_s)(Y, 1) + t_cap*(*direction_s)(Y, 1);
 		  if (sqrt(ray_x*ray_x + ray_y*ray_y) <= 1)
 		  {
+			  t_cap = calculateRealT(t_cap, start, *start_s, direction, *direction_s);
+			  
 			  // check if the ray intersects cylinder cap when entering
 			  // or exiting the cylinder object
 			  if (t_cap < rayOnObj.enter)
@@ -281,6 +310,8 @@ Matrix<double>* Cylinder::calculateSurfaceNormal(const Matrix<double>& intersect
 
 	Matrix<double>* surf_normal = *M_it * *temp;
 	temp->Erase(); delete temp;
+	
+	(*surf_normal)(4, 1) = 0;
 	temp = surf_normal->normalize();
 	surf_normal->Erase(); delete surf_normal;
 	intersection_s->Erase(); delete intersection_s;
@@ -310,8 +341,8 @@ void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		double t = -(*start_s)(Z, 1) / (*direction_s)(Z, 1);
 		if (t >= 0)
 		{
-		  rayOnObj.enter = t;
-		  rayOnObj.exit = t;
+		  rayOnObj.enter = calculateRealT(t, start, *start_s, direction, *direction_s);
+		  rayOnObj.exit = rayOnObj.enter;
 		}
 	}
 	
@@ -326,7 +357,7 @@ Matrix<double>* Plane::calculateSurfaceNormal(const Matrix<double>& intersection
 
 	(*surf_normal)(Z, 1) = 1;
 
-	Matrix<double>* temp = *M_it * *surf_normal;
+	Matrix<double>* temp = *M * *surf_normal;
 	surf_normal->Erase(); delete surf_normal;
 	surf_normal = temp->normalize();
 	temp->Erase(); delete temp;
@@ -360,6 +391,9 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	double b = start_s->multiplyDot(*direction_s);
 	double c = start_s->multiplyDot(*start_s) - 1;
 
+	start_s->setHeight(4);
+	direction_s->setHeight(4);
+
 	double isRayHit = b*b - a*c;
 
 	if (isRayHit >= 0)
@@ -367,7 +401,12 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		double t1 = -b / a + sqrt(isRayHit) / a,
 			t2 = -b / a - sqrt(isRayHit) / a;
 
-		setHitEnterAndExit(t1, t2);
+		double t1r = calculateRealT(t1, start, *start_s, direction, *direction_s);
+
+		if (t2 != t1)
+			t2 = calculateRealT(t2, start, *start_s, direction, *direction_s);
+		
+		setHitEnterAndExit(t1r, t2);
 	}
 
 	start_s->Erase(); delete start_s;
@@ -383,7 +422,7 @@ Matrix<double>* Sphere::calculateSurfaceNormal(const Matrix<double>& intersectio
 
 	Matrix<double>* temp = *M_it * *surf_normal;
 	surf_normal->Erase(); delete surf_normal;
-	
+	(*temp)(4, 1) = 0;
 	surf_normal = temp->normalize();
 	temp->Erase(); delete temp;
 
@@ -406,6 +445,7 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	Matrix<double>* start_s = *M_i * start;
 	
 	Matrix<double>* temp = *M_i * direction;
+	(*temp)(4, 1) = 0;
 	Matrix<double>* direction_s = temp->normalize();
 	temp->Erase(); delete temp;
 	
@@ -422,10 +462,13 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		double t1 = -b / a + sqrt(isRayHit) / a,
 			t2 = -b / a - sqrt(isRayHit) / a;
 
-    if (t1 >= -BIAS && t2 >= -BIAS)
-    {
+		if (t1 >= -BIAS && t2 >= -BIAS)
+		{
 		  double z1 = (*start_s)(Z, 1) + (*direction_s)(Z, 1)*t1,
 			  z2 = (*start_s)(Z, 1) + (*direction_s)(Z, 1)*t2;
+
+		  t1 = calculateRealT(t1, start, *start_s, direction, *direction_s);
+		  t2 = calculateRealT(t2, start, *start_s, direction, *direction_s);
 
 		  // when the ray enter & exit at cone walls,
 		  // we've found both hit times
@@ -461,6 +504,7 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 
 		  if (sqrt(ray_x*ray_x + ray_y*ray_y) <= 1)
 		  {
+			  t_cap = calculateRealT(t_cap, start, *start_s, direction, *direction_s);
 			  if (t_cap < rayOnObj.enter)
 			  {
 				  rayOnObj.exit_type = rayOnObj.enter_type;
@@ -501,7 +545,10 @@ Matrix<double>* Cone::calculateSurfaceNormal(const Matrix<double>& intersection,
 
 	Matrix<double>* surf_normal = *M_it * *temp;
 	temp->Erase(); delete temp;
+	
+	(*surf_normal)(4, 1) = 0;
 	temp = surf_normal->normalize();
+	
 	surf_normal->Erase(); delete surf_normal;
 	intersection_s->Erase(); delete intersection_s;
 
