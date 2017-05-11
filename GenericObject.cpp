@@ -257,7 +257,7 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	
 	//-----------for cylinder caps
 
-	if ((*direction_s)(Z, 1) < -BIAS)
+	if ((*direction_s)(Z, 1) != 0)
 	{
 		double t_cap = (((*direction_s)(Z, 1)<0?1:-1) - (*start_s)(Z, 1)) / (*direction_s)(Z, 1);
 		
@@ -311,8 +311,9 @@ Matrix<double>* Cylinder::calculateSurfaceNormal(const Matrix<double>& intersect
 	Matrix<double>* surf_normal = *M_it * *temp;
 	temp->Erase(); delete temp;
 	
-	(*surf_normal)(4, 1) = 0;
 	temp = surf_normal->normalize();
+	(*temp)(4, 1) = 0;
+	
 	surf_normal->Erase(); delete surf_normal;
 	intersection_s->Erase(); delete intersection_s;
 
@@ -341,6 +342,7 @@ void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		double t = -(*start_s)(Z, 1) / (*direction_s)(Z, 1);
 		if (t >= 0)
 		{
+		  //rayOnObj.enter = t;
 		  rayOnObj.enter = calculateRealT(t, start, *start_s, direction, *direction_s);
 		  rayOnObj.exit = rayOnObj.enter;
 		}
@@ -360,8 +362,9 @@ Matrix<double>* Plane::calculateSurfaceNormal(const Matrix<double>& intersection
 	Matrix<double>* temp = *M_it * *surf_normal;
 	surf_normal->Erase(); delete surf_normal;
 	
-	(*temp)(4, 1) = 0;
+	
 	surf_normal = temp->normalize();
+	(*surf_normal)(4, 1) = 0;
 	temp->Erase(); delete temp;
 
 	return surf_normal;
@@ -424,8 +427,9 @@ Matrix<double>* Sphere::calculateSurfaceNormal(const Matrix<double>& intersectio
 
 	Matrix<double>* temp = *M_it * *surf_normal;
 	surf_normal->Erase(); delete surf_normal;
-	(*temp)(4, 1) = 0;
+
 	surf_normal = temp->normalize();
+	(*surf_normal)(4, 1) = 0;
 	temp->Erase(); delete temp;
 
 	return surf_normal;
@@ -495,9 +499,9 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		}
 	}
 
-	if ((*direction_s)(Z, 1) < -BIAS)
+	if ((*direction_s)(Z, 1) != 0)
 	{
-		double t_cap = (-1 - (*start_s)(Z, 1)) / (*direction_s)(Z, 1);
+		double t_cap = (((*direction_s)(Z, 1)<0?1:-1) - (*start_s)(Z, 1)) / (*direction_s)(Z, 1);
 		
 		if (t_cap >= 0)
 		{
@@ -548,8 +552,9 @@ Matrix<double>* Cone::calculateSurfaceNormal(const Matrix<double>& intersection,
 	Matrix<double>* surf_normal = *M_it * *temp;
 	temp->Erase(); delete temp;
 	
-	(*surf_normal)(4, 1) = 0;
+
 	temp = surf_normal->normalize();
+	(*temp)(4, 1) = 0;
 	
 	surf_normal->Erase(); delete surf_normal;
 	intersection_s->Erase(); delete intersection_s;
