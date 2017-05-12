@@ -33,5 +33,5 @@ Light.h: Matrix.h model.h
 model.h: Matrix.h
 
 clean:
-	\rm -rf *.o *~ main
+	\rm -rf *.o *~ Main
 

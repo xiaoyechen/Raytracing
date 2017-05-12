@@ -30,6 +30,7 @@ public:
 	hit_t getRayHit() const;
 	color_t getColor() const;
 	double getCoeff(unsigned light_type) const;
+  Matrix<double>* getMInverse() const;
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type)=0;
 protected:
 	GenericObject();

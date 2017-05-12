@@ -71,12 +71,18 @@ double PointLight::calculateIntensity(Matrix<double> &intersection) const
 	return intensity / (4*M_PI*dir_normal);
 }
 
+Matrix<double>* PointLight::getDirOpposite() const
+{
+  return nullptr;
+}
+
 DirectedLight::DirectedLight()
 {
 }
 
 DirectedLight::~DirectedLight()
 {
+  dir_neg->Erase(); delete dir_neg;
 }
 
 void DirectedLight::setPosition(double x, double y, double z)
@@ -87,10 +93,16 @@ void DirectedLight::setPosition(double x, double y, double z)
 	
 	position->Erase(); delete position;
 	position = temp;
+  dir_neg = -*position;
 }
 
 double DirectedLight::calculateIntensity(Matrix<double>& intersection) const
 {
 	return Light::getIntensity();
+}
+
+Matrix<double>* DirectedLight::getDirOpposite() const
+{
+  return dir_neg;
 }
 

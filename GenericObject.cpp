@@ -187,6 +187,11 @@ double GenericObject::getCoeff(unsigned light_type) const
 	}
 }
 
+Matrix<double>* GenericObject::getMInverse() const
+{
+  return M_i;
+}
+
 Cylinder::Cylinder()
 {
 	type = OBJ_CYLINDER;
@@ -310,9 +315,9 @@ Matrix<double>* Cylinder::calculateSurfaceNormal(const Matrix<double>& intersect
 
 	Matrix<double>* surf_normal = *M_it * *temp;
 	temp->Erase(); delete temp;
-	
+  (*surf_normal)(4, 1) = 0;
+
 	temp = surf_normal->normalize();
-	(*temp)(4, 1) = 0;
 	
 	surf_normal->Erase(); delete surf_normal;
 	intersection_s->Erase(); delete intersection_s;
@@ -362,9 +367,9 @@ Matrix<double>* Plane::calculateSurfaceNormal(const Matrix<double>& intersection
 	Matrix<double>* temp = *M_it * *surf_normal;
 	surf_normal->Erase(); delete surf_normal;
 	
-	
+  (*temp)(4, 1) = 0;
 	surf_normal = temp->normalize();
-	(*surf_normal)(4, 1) = 0;
+	
 	temp->Erase(); delete temp;
 
 	return surf_normal;
@@ -388,7 +393,7 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 	Matrix<double>* temp = *M_i * direction;
 	Matrix<double>* direction_s = temp->normalize();
 	temp->Erase(); delete temp;
-
+  //Matrix<double>* direction_s = new Matrix<double>(direction);
 	start_s->setHeight(3);
 	direction_s->setHeight(3);
 
@@ -420,16 +425,17 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 
 Matrix<double>* Sphere::calculateSurfaceNormal(const Matrix<double>& intersection, unsigned hit_type)
 {
-	Matrix<double>* surf_normal = new Matrix<double>(4, 1, 0);
+  Matrix<double>* intersection_s = *M_i * intersection;
 
-	surf_normal->copy(intersection);
+	Matrix<double>* surf_normal = new Matrix<double>(*intersection_s);
 	(*surf_normal)(4, 1) = 0;
+  intersection_s->Erase(); delete intersection_s;
 
 	Matrix<double>* temp = *M_it * *surf_normal;
 	surf_normal->Erase(); delete surf_normal;
-
+  (*temp)(4, 1) = 0;
 	surf_normal = temp->normalize();
-	(*surf_normal)(4, 1) = 0;
+	
 	temp->Erase(); delete temp;
 
 	return surf_normal;
@@ -551,10 +557,9 @@ Matrix<double>* Cone::calculateSurfaceNormal(const Matrix<double>& intersection,
 
 	Matrix<double>* surf_normal = *M_it * *temp;
 	temp->Erase(); delete temp;
-	
+  (*surf_normal)(4, 1) = 0;
 
 	temp = surf_normal->normalize();
-	(*temp)(4, 1) = 0;
 	
 	surf_normal->Erase(); delete surf_normal;
 	intersection_s->Erase(); delete intersection_s;

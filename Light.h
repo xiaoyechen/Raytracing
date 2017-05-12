@@ -7,6 +7,7 @@ public:
 	Light();
 	color_t getColor() const;
 	Matrix<double>* getPosition() const;
+  virtual Matrix<double>* getDirOpposite() const = 0;
 	double getIntensity() const;
 	virtual void setPosition(double x, double y, double z);
 	void setIntensity(double it);
@@ -27,6 +28,7 @@ public:
 	virtual ~PointLight();
 	virtual void setPosition(double x, double y, double z);
 	virtual double calculateIntensity(Matrix<double> &intersection) const;
+  virtual Matrix<double>* getDirOpposite() const;
 };
 
 class DirectedLight : public Light
@@ -36,4 +38,7 @@ public:
 	virtual ~DirectedLight();
 	virtual void setPosition(double x, double y, double z);
 	virtual double calculateIntensity(Matrix<double> &intersection) const;
+  virtual Matrix<double>* getDirOpposite() const;
+protected:
+  Matrix<double>* dir_neg;
 };
