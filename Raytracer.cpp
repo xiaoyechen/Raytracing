@@ -45,14 +45,12 @@ Matrix<double>* projTrans(Matrix<double> &P)
 void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix<double> &surf_normal, Matrix<double> &surf_to_cam, const Light &light, Matrix<double> &surf_to_light, color_t &shading)
 {
 	Matrix<double>* surf_light_negative = -surf_to_light;
-	double surf_normal_mag = surf_normal.normal();
-
-	Matrix<double>* temp = surf_normal.multiplyDot(2 * surf_to_light.multiplyDot(surf_normal) / (surf_normal_mag*surf_normal_mag));
+	Matrix<double>* temp = surf_normal.multiplyDot(2 * surf_to_light.multiplyDot(surf_normal));
 	Matrix<double>* reflection = *surf_light_negative+*temp;
 	temp->Erase(); delete temp;
 
-	double i_diffuse = surf_to_light.multiplyDot(surf_normal) / (surf_normal_mag*surf_to_light.normal());
-	double i_spec = pow(reflection->multiplyDot(surf_to_cam) / (reflection->normal() * surf_to_cam.normal()), obj->getFallout());
+	double i_diffuse = surf_to_light.multiplyDot(surf_normal);
+	double i_spec = pow(reflection->multiplyDot(surf_to_cam), obj->getFallout());
 
 	if (isnan(i_diffuse) || i_diffuse < 0) i_diffuse = 0;
 	if (isnan(i_spec) || i_spec < 0) i_spec = 0;
@@ -130,8 +128,7 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 		{
 			objects[idx]->setRayHit(*rayOnObj, *li_inf.getDirOpposite());
 
-			if (objects[idx]->getRayHit().enter >= -BIAS && objects[idx]->getRayHit().enter <= 1)
-			//if (!isinf(objects[idx]->getRayHit().enter))
+			if (objects[idx]->getRayHit().enter >= -BIAS && !isinf(objects[idx]->getRayHit().enter))
 				break;
 		}
 
@@ -144,8 +141,7 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 		{
 			objects[idx]->setRayHit(*rayOnObj, *surface_to_light);
 
-			if (objects[idx]->getRayHit().enter >= -BIAS && objects[idx]->getRayHit().enter <= 1)
-				//if (!isinf(objects[idx]->getRayHit().enter))
+			if (objects[idx]->getRayHit().enter >= -BIAS  && !isinf(objects[idx]->getRayHit().enter))
 				break;
 		}
 
@@ -160,6 +156,7 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 				Matrix<double>* reflection_dir = surf_norm->multiplyDot(2 * d.multiplyDot(*surf_norm));
 				Matrix<double>* temp = d - *reflection_dir;
 				reflection_dir->Erase(); delete reflection_dir;
+        (*temp)(4, 1) = 0;
 				reflection_dir = temp->normalize();
 				temp->Erase(); delete temp;
 
