@@ -90,36 +90,57 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 {
 	color_t shadeC;
 
+  // trace incident ray from e and check if it intersects any object
 	for (unsigned obj_idx = 0; obj_idx < objects.size(); ++obj_idx)
 		objects[obj_idx]->setRayHit(e, d);
 
 	unsigned tmin_idx = findMinHitIdx(objects);
 
-	if (!isinf(objects[tmin_idx]->getRayHit().enter))
+	if (!isinf(objects[tmin_idx]->getRayHit().enter) && objects[tmin_idx]->getRayHit().enter >= -BIAS)
 	{
-		// calculate local shading components
+		// calculate intersection point
 		Matrix<double>* temp = d.multiplyDot(objects[tmin_idx]->getRayHit().enter);
 		Matrix<double>* rayOnObj = e + *temp;
 		temp->Erase(); delete temp;
+    unsigned rayhit_type = objects[tmin_idx]->getRayHit().enter_type;
 
+    // direction vector from intersection to point light source
 		temp = *li.getPosition() - *rayOnObj;
 		Matrix<double>* surface_to_light = temp->normalize();
-
 		temp->Erase(); delete temp;
 
+    // direction vector from intersection to camera
+    temp = e - *rayOnObj;
+    Matrix<double>* surf_to_cam = temp->normalize();
+    temp->Erase(); delete temp;
+
+    // surface normal at intersection
+    Matrix<double>* surf_norm = objects[tmin_idx]->calculateSurfaceNormal(*rayOnObj, rayhit_type);
+
+    bool is_inside = (d.multiplyDot(*surf_norm) > 0) ? true : false;
+    if (is_inside)
+    {
+      //shadeC.r = 0; shadeC.g = 0; shadeC.b = 0;
+      temp = -*surf_norm;
+      surf_norm->Erase(); delete surf_norm;
+      surf_norm = temp;
+    }
+
+    Matrix<double>* bias_offset = surf_norm->multiplyDot(BIAS);
+    Matrix<double>* rayOnObjPlus = *rayOnObj + *bias_offset;
+    Matrix<double>* rayOnObjMinus = *rayOnObj - *bias_offset;
+    bias_offset->Erase(); delete bias_offset;
+
+    // calculate local shading components
+
+    // ambient
 		double ambient_coeff = objects[tmin_idx]->getCoeff(COLOR_AMBIENT);
 		color_t obj_color = objects[tmin_idx]->getColor();
 		shadeC.r = ambient_coeff * obj_color.r;
 		shadeC.g = ambient_coeff * obj_color.g;
 		shadeC.b = ambient_coeff * obj_color.b;
 
-		unsigned rayhit_type = objects[tmin_idx]->getRayHit().enter_type;
-
-		temp = e - *rayOnObj;
-		Matrix<double>* surf_to_cam = temp->normalize();
-		temp->Erase(); delete temp;
-
-		Matrix<double>* surf_norm = objects[tmin_idx]->calculateSurfaceNormal(*rayOnObj, rayhit_type);
+    // diffuse + specular
 
 		// trace a 2nd ray from intersection to infinite light source and see if it hits an object
 		// i.e. whether current object is in shadow
@@ -127,11 +148,9 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 		for (idx = 0; idx < objects.size(); ++idx)
 		{
 			objects[idx]->setRayHit(*rayOnObj, *li_inf.getDirOpposite());
-
-			if (objects[idx]->getRayHit().enter >= -BIAS && !isinf(objects[idx]->getRayHit().enter))
+			if (!isinf(objects[idx]->getRayHit().enter) && objects[idx]->getRayHit().enter >= -BIAS)
 				break;
 		}
-
 		if (idx >= objects.size())
 			calculateIntensityInfinite(objects[tmin_idx], *surf_norm, *surf_to_cam, li_inf, shadeC);
 
@@ -140,11 +159,9 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 		for (idx = 0; idx < objects.size(); ++idx)
 		{
 			objects[idx]->setRayHit(*rayOnObj, *surface_to_light);
-
-			if (objects[idx]->getRayHit().enter >= -BIAS  && !isinf(objects[idx]->getRayHit().enter))
+			if (!isinf(objects[idx]->getRayHit().enter) && objects[idx]->getRayHit().enter >= -BIAS)
 				break;
 		}
-
 		if (idx >= objects.size())
 			calculateIntensity(objects[tmin_idx], *rayOnObj, *surf_norm, *surf_to_cam, li, *surface_to_light, shadeC);
 		
@@ -160,7 +177,7 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 				reflection_dir = temp->normalize();
 				temp->Erase(); delete temp;
 
-				addColor(shadeC, multiplyColor(objects[tmin_idx]->getReflect(), shade(objects, *rayOnObj, *reflection_dir, li, li_inf, k - 1)));
+				addColor(shadeC, multiplyColor(objects[tmin_idx]->getReflect(), shade(objects, *rayOnObjPlus, *reflection_dir, li, li_inf, k - 1)));
 				reflection_dir->Erase(); delete reflection_dir;
 			}
 			
@@ -170,25 +187,18 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 				double median_ratio = objects[tmin_idx]->getRefract();
 
 				// determine whether we are entering/exiting the median
-				double n_dot_d = surf_norm->multiplyDot(d);
+				double n_dot_d = -surf_norm->multiplyDot(d);
 				Matrix<double>* refract_norm = new Matrix<double>(*surf_norm);
-        //std::cout << *surf_norm << d<<std::endl;
-				if (n_dot_d < 0) 
-				{
-          n_dot_d = -n_dot_d;
-				}
-        else// exiting
+
+        if (is_inside)
         {
-          refract_norm->Erase(); delete refract_norm;
-          refract_norm = -*surf_norm;
-
-          median_ratio = 1 / median_ratio;
-
-          //shadeC.r = 0; shadeC.g = 0; shadeC.b = 0;
-          
-          n_dot_d = refract_norm->multiplyDot(d);
+          shadeC.r = 0; shadeC.g = 0; shadeC.b = 0;
         }
-				
+        else
+        {
+          median_ratio = 1 / median_ratio;
+        }
+
 				double refract_rate = 1 - median_ratio*median_ratio * (1 - n_dot_d*n_dot_d);
 
 				// check if refraction above threshold (90 degree)
@@ -201,7 +211,11 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 					Matrix<double>* refract_dir = *temp2 + *temp;
 					temp->Erase(); delete temp;
 					temp2->Erase(); delete temp2;
-
+          (*refract_dir)(4, 1) = 0;
+          temp = refract_dir->normalize();
+          refract_dir->Erase(); delete refract_dir;
+          refract_dir = temp;
+          std::cout << d << *refract_norm<<*refract_dir;
 					addColor(shadeC, multiplyColor(objects[tmin_idx]->getTransparency(), shade(objects, *rayOnObj, *refract_dir, li, li_inf, k - 1)));
 
 					refract_dir->Erase(); delete refract_dir;
@@ -213,11 +227,13 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 		surf_to_cam->Erase(); delete surf_to_cam;
 		surf_norm->Erase(); delete surf_norm;
 		rayOnObj->Erase(); delete rayOnObj;
+    rayOnObjPlus->Erase(); delete rayOnObjPlus;
+    rayOnObjMinus->Erase(); delete rayOnObjMinus;
 		surface_to_light->Erase(); delete surface_to_light;
 	}
 	else
 	{
-		//color=0 0 0
+		// the ray didn't intersect anything, return black
 		shadeC.r = 0; shadeC.g = 0; shadeC.b = 0;
 	}
 
@@ -273,7 +289,7 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				direction->Erase(); delete direction;
 				direction = temp;
 				
-				color_t shading = shade(objects, *cam->getE(), *direction, light, light_inf, 2);
+				color_t shading = shade(objects, *cam->getE(), *direction, light, light_inf, RECURSIVE_LV);
 				
 				direction->Erase(); delete direction;
 
