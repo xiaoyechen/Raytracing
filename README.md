@@ -1,7 +1,7 @@
 # Raytracing 
 (In progress)
 
-[Current scene preview](raytraceresult.JPG)
+![Current scene preview](raytraceresult.JPG)
 
 Simple ray tracer program using X11 library for display
 
