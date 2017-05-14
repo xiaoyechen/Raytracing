@@ -34,7 +34,7 @@
 
 #define BIAS (1e-6)
 
-#define RECURSIVE_LV 2
+#define RECURSIVE_LV 5
 struct window_t {
 	unsigned width, height;
 };

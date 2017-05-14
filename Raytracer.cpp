@@ -147,7 +147,7 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 		unsigned idx = 0;
 		for (idx = 0; idx < objects.size(); ++idx)
 		{
-			objects[idx]->setRayHit(*rayOnObj, *li_inf.getDirOpposite());
+			objects[idx]->setRayHit(*rayOnObjPlus, *li_inf.getDirOpposite());
 			if (!isinf(objects[idx]->getRayHit().enter) && objects[idx]->getRayHit().enter >= -BIAS)
 				break;
 		}
@@ -158,7 +158,7 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 		// i.e. whether current object is in shadow
 		for (idx = 0; idx < objects.size(); ++idx)
 		{
-			objects[idx]->setRayHit(*rayOnObj, *surface_to_light);
+			objects[idx]->setRayHit(*rayOnObjPlus, *surface_to_light);
 			if (!isinf(objects[idx]->getRayHit().enter) && objects[idx]->getRayHit().enter >= -BIAS)
 				break;
 		}
@@ -184,7 +184,7 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 			// refraction
 			if (objects[tmin_idx]->getTransparency() != 0)
 			{
-				double median_ratio = objects[tmin_idx]->getRefract();
+				double median_ratio = is_inside?objects[tmin_idx]->getRefract():(1/objects[tmin_idx]->getRefract());
 
 				// determine whether we are entering/exiting the median
 				double n_dot_d = -surf_norm->multiplyDot(d);
@@ -194,11 +194,7 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
         {
           shadeC.r = 0; shadeC.g = 0; shadeC.b = 0;
         }
-        else
-        {
-          median_ratio = 1 / median_ratio;
-        }
-
+        
 				double refract_rate = 1 - median_ratio*median_ratio * (1 - n_dot_d*n_dot_d);
 
 				// check if refraction above threshold (90 degree)
@@ -211,12 +207,12 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 					Matrix<double>* refract_dir = *temp2 + *temp;
 					temp->Erase(); delete temp;
 					temp2->Erase(); delete temp2;
-          (*refract_dir)(4, 1) = 0;
+
           temp = refract_dir->normalize();
           refract_dir->Erase(); delete refract_dir;
           refract_dir = temp;
-          std::cout << d << *refract_norm<<*refract_dir;
-					addColor(shadeC, multiplyColor(objects[tmin_idx]->getTransparency(), shade(objects, *rayOnObj, *refract_dir, li, li_inf, k - 1)));
+
+					addColor(shadeC, multiplyColor(objects[tmin_idx]->getTransparency(), shade(objects, *rayOnObjMinus, *refract_dir, li, li_inf, k - 1)));
 
 					refract_dir->Erase(); delete refract_dir;
 				}
@@ -296,7 +292,7 @@ void raytrace(window_t w, Camera *cam, int ***framebuffer,
 				if (shading.r > 1) shading.r = 1;
 				if (shading.g > 1) shading.g = 1;
 				if (shading.b > 1) shading.b = 1;
-
+        
 				total_color[COLOR_R] += shading.r * SATURATION;
 				total_color[COLOR_G] += shading.g * SATURATION;
 				total_color[COLOR_B] += shading.b * SATURATION;

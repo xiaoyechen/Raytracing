@@ -16,10 +16,10 @@ void GenericObject::setHitEnterAndExit(double hit1, double hit2)
 {
   if (hit1 < -BIAS && hit2< -BIAS) return;
   
-	//if (hit1 < -BIAS)
-	//	rayOnObj.enter = hit2;
-	//else if (hit2 < -BIAS)
-	//	rayOnObj.enter = hit1;
+	if (hit1 < -BIAS)
+		rayOnObj.enter = hit2;
+	else if (hit2 < -BIAS)
+		rayOnObj.enter = hit1;
 	else if (hit1 <= hit2)
 	{
 		rayOnObj.enter = hit1;
@@ -435,7 +435,6 @@ Matrix<double>* Sphere::calculateSurfaceNormal(const Matrix<double>& intersectio
 	surf_normal->Erase(); delete surf_normal;
   (*temp)(4, 1) = 0;
 	surf_normal = temp->normalize();
-	
 	temp->Erase(); delete temp;
 
 	return surf_normal;
