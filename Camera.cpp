@@ -244,6 +244,7 @@ void Camera::moveCamera(unsigned dir)
 	}
 
 	setEyeWorld((*newPos)(X, 1), (*newPos)(Y, 1), (*newPos)(Z, 1));
+
   buildCamera();
   
 	temp->Erase(); delete temp;
@@ -253,34 +254,31 @@ void Camera::moveCamera(unsigned dir)
 /* assume rangle in radian */
 Matrix<double>* Camera::calculateRotationalMatrix(const Matrix<double> &axis, double rangle)
 {
-	Matrix<double> Jv(3, 3);
-	Jv(X, 1) = 0;
+	Matrix<double> Jv(3, 3, 0);
 	Jv(X, 2) = -axis(Z, 1);
 	Jv(X, 3) = axis(Y, 1);
 
 	Jv(Y, 1) = axis(Z, 1);
-	Jv(Y, 2) = 0;
 	Jv(Y, 3) = -axis(X, 1);
 
 	Jv(Z, 1) = -axis(Y, 1);
 	Jv(Z, 2) = axis(X, 1);
-	Jv(Z, 3) = 0;
 
 	Matrix<double> identity(3, 3);
 	identity.identity();
-
 	Matrix<double>* temp = Jv.multiplyDot(sin(rangle));
 	Matrix<double>* rmat = identity+*temp;
 	temp->Erase(); delete temp;
 	Matrix<double>* JvSq = Jv*Jv;
+  
 	temp = JvSq->multiplyDot(1 - cos(rangle));
-	Matrix<double>* result = *rmat+*JvSq;
-	rmat->Erase(); delete rmat;
-	rmat = result;
+  JvSq->Erase(); delete JvSq;
 
-	JvSq->Erase(); delete JvSq;
-	temp->Erase(); delete temp;
+	Matrix<double>* result = *rmat+*temp;
+  temp->Erase(); delete temp;
+  rmat->Erase(); delete rmat;
 
+  rmat = result;
 	return rmat;
 }
 
