@@ -1,6 +1,6 @@
 #pragma once
 #include "Matrix.h"
-#include "model.h"
+#include "Model.h"
 
 #define COLOR_ORIGIN 0
 #define COLOR_SPEC 1

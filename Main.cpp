@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
-#include "model.h"
+#include "Model.h"
 #include "Camera.h"
 #include "GenericObject.h"
 #include "Light.h"

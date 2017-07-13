@@ -1,6 +1,6 @@
 #pragma once
 #include "Matrix.h"
-#include "model.h"
+#include "Model.h"
 class Camera
 {
 public:

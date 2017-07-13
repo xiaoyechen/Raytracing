@@ -52,8 +52,8 @@ void calculateIntensity(GenericObject *obj, Matrix<double> &intersection, Matrix
 	double i_diffuse = surf_to_light.multiplyDot(surf_normal);
 	double i_spec = pow(reflection->multiplyDot(surf_to_cam), obj->getFallout());
 
-	if (isnan(i_diffuse) || i_diffuse < 0) i_diffuse = 0;
-	if (isnan(i_spec) || i_spec < 0) i_spec = 0;
+	if (std::isnan(i_diffuse) || i_diffuse < 0) i_diffuse = 0;
+	if (std::isnan(i_spec) || i_spec < 0) i_spec = 0;
 
 	double lightI = light.calculateIntensity(intersection);
   double total_coeff = lightI *(obj->getCoeff(COLOR_DIFFUSE) * i_diffuse + i_spec*obj->getCoeff(COLOR_SPEC));
@@ -75,8 +75,8 @@ void calculateIntensityInfinite(GenericObject *obj, Matrix<double> &surf_norm, M
 	double Id_inf = light.getDirOpposite()->multiplyDot(surf_norm);
 	double Is_inf = pow(reflection_inf->multiplyDot(surf_to_cam), obj->getFallout());
 
-	if (isnan(Id_inf) || Id_inf < 0) Id_inf = 0;
-	if (isnan(Is_inf) || Is_inf < 0) Is_inf = 0;
+	if (std::isnan(Id_inf) || Id_inf < 0) Id_inf = 0;
+	if (std::isnan(Is_inf) || Is_inf < 0) Is_inf = 0;
 
   double total_coeff = light.getIntensity()*(Id_inf*obj->getCoeff(COLOR_DIFFUSE) + Is_inf*obj->getCoeff(COLOR_SPEC));
   shading.r += light.getColor().r*total_coeff;
@@ -96,7 +96,7 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 
 	unsigned tmin_idx = findMinHitIdx(objects);
 
-	if (!isinf(objects[tmin_idx]->getRayHit().enter) && objects[tmin_idx]->getRayHit().enter >= -BIAS)
+	if (!std::isinf(objects[tmin_idx]->getRayHit().enter) && objects[tmin_idx]->getRayHit().enter >= -BIAS)
 	{
 		// calculate intersection point
 		Matrix<double>* temp = d.multiplyDot(objects[tmin_idx]->getRayHit().enter);
@@ -148,7 +148,7 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 		for (idx = 0; idx < objects.size(); ++idx)
 		{
 			objects[idx]->setRayHit(*rayOnObjPlus, *li_inf.getDirOpposite());
-			if (!isinf(objects[idx]->getRayHit().enter) && objects[idx]->getRayHit().enter >= -BIAS)
+			if (!std::isinf(objects[idx]->getRayHit().enter) && objects[idx]->getRayHit().enter >= -BIAS)
 				break;
 		}
 		if (idx >= objects.size())
@@ -159,7 +159,7 @@ color_t shade(const std::vector<GenericObject*> &objects, Matrix<double> &e, Mat
 		for (idx = 0; idx < objects.size(); ++idx)
 		{
 			objects[idx]->setRayHit(*rayOnObjPlus, *surface_to_light);
-			if (!isinf(objects[idx]->getRayHit().enter) && objects[idx]->getRayHit().enter >= -BIAS)
+			if (!std::isinf(objects[idx]->getRayHit().enter) && objects[idx]->getRayHit().enter >= -BIAS)
 				break;
 		}
 		if (idx >= objects.size())

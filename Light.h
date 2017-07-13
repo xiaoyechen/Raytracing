@@ -1,5 +1,5 @@
 #pragma once
-#include "model.h"
+#include "Model.h"
 #include "Matrix.h"
 class Light
 {
