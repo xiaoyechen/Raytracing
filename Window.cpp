@@ -54,7 +54,7 @@ void drawObj(Display *d, Window w, int s, unsigned w_width, unsigned w_height, i
 
 void draw(window_t screen, Camera &cam, std::vector<GenericObject*> &objects, Light &light, Light &light_inf, double near, double view_angle)
 {
-	Display *d;
+	Display *d = NULL;
 	Window w;
 	XEvent e;
 	int s;

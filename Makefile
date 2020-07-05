@@ -5,7 +5,7 @@ LFLAGS=-std=c++11 -g -lm -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
 Main: Main.o Raytracer.o Window.o Camera.o Light.o GenericObject.o Matrix.o templates.cpp
 	$(CC) -o $@ $^ $(LFLAGS)
 
-Main.o: Main.cpp Window.h Camera.h GenericObject.h Matrix.h model.h
+Main.o: Main.cpp Window.h Camera.h GenericObject.h Matrix.h Model.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 Window.o: Window.cpp Window.h Raytracer.h Model.h

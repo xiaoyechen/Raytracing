@@ -5,11 +5,14 @@
 
 Simple ray tracer program using X11 library for display
 
-- Use `make` to compile and `./Main test_input.txt` to run on Linux
+Platform: Linux (tested on Ubuntu)
+
+- Use `make` to compile (may need to install xorg-dev: `sudo apt install xorg-dev`
+- Use `./Main test_input.txt` to run
 - When running, use `↑↓←→` keys to rotate the camera around; press `f`/`b` to move camera away from or closer to origin
 
 Note: 
-1. Most of the constants are in model.h
+1. Most of the constants are in Model.h
 2. Currently implemented object types: plane, sphere, cylinder and cone
 
 Input file format:
