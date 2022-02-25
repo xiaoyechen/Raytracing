@@ -33,15 +33,13 @@ int main(int argc, char** argv)
 	}
 
 	window_t display_window;
-	double aspect_ratio;
 	double posx, posy, posz, cr, cg, cb, intensity;
 	Camera cam;
 	double cam_x, cam_y, cam_z;
 	double near, far, view_angle;
 	Scene sceneInfo;
 
-	inf >> display_window.height >> aspect_ratio;
-	display_window.width = aspect_ratio * display_window.height;
+	inf >> display_window.width >> display_window.height;
 	
 	inf >> posx >> posy >> posz >> cr >> cg >> cb >> intensity;
 	PointLight light = PointLight(posx, posy, posz, cr, cg, cb, intensity);
