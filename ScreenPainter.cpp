@@ -64,6 +64,11 @@ void ScreenPainter::drawRows(bool retrace, Display& d, Window w, int s, unsigned
 			for (int col = 0; col < mWidth; ++col)
 			{
 				mFrameBuffer[row][col] = mRaytracer->calculatePixelColor(mHeight, mWidth, mHeight-row-1, col);
+				/*color_t color = mRaytracer->calculatePixelColor(mHeight, mWidth, mHeight-row-1, col);
+				XLockDisplay(&d);
+				setCurrentColorX(&d, &DefaultGC(&d, s), color.r, color.g, color.b);
+				setPixelX(&d, w, s, col, row);
+				XUnlockDisplay(&d);*/
 			}
 		}
 		XLockDisplay(&d);
@@ -162,17 +167,20 @@ void ScreenPainter::draw(Scene* sceneInfo)
 			//drawRows(camUpdate, *d,w,s, 0, 1);
 
 			/// Multithread
-			unsigned workerCount = 2;
+			unsigned workerCount = std::thread::hardware_concurrency();
+			if (workerCount <= 0) 
+			{
+				workerCount = 1;
+			}
+
 			std::vector<std::thread> workers;
-			
 			for(unsigned workerIdx = 0; workerIdx < workerCount; ++workerIdx)
 			{
 				workers.push_back(std::thread(&ScreenPainter::drawRows, this, camUpdate, std::ref(*d), w, s, workerIdx, workerCount));
 			}
-			
-			for(unsigned workerIdx = 0; workerIdx < workerCount; ++workerIdx)
+			for(auto& worker : workers)
 			{
-				workers[workerIdx].join();
+				worker.join();
 			}
 		}
 

@@ -18,16 +18,15 @@ color_t multiplyColor(double coeff, color_t c)
 	return result;
 }
 
-unsigned Raytracer::findMinHitIdx()
+unsigned Raytracer::findMinHitIdx(std::vector<hit_t>& rayOnObjects)
 {
-	std::vector<GenericObject*> objects = mpScene->GetObjects();
-	size_t objCount = objects.size();
+	size_t objCount = rayOnObjects.size();
 	if (objCount == 1) return 0;
 
 	unsigned min_idx = 0;
 	for (unsigned i = 1; i < objCount; ++i)
 	{
-		if (objects[i]->getRayHit().enter < objects[min_idx]->getRayHit().enter)
+		if (rayOnObjects[i].enter < rayOnObjects[min_idx].enter)
 			min_idx = i;
 	}
 
@@ -98,18 +97,19 @@ color_t Raytracer::shade(Matrix<double> &e, Matrix<double> &d, int k)
 	const Light* li_inf = mpScene->GetInfiniteLight();
 
   // trace incident ray from e and check if it intersects any object
+	std::vector<hit_t> rayOnObjects(objects.size(), hit_t());
 	for (unsigned obj_idx = 0; obj_idx < objects.size(); ++obj_idx)
-		objects[obj_idx]->setRayHit(e, d);
+		objects[obj_idx]->setRayHit(e, d, rayOnObjects[obj_idx]);
 
-	unsigned tmin_idx = findMinHitIdx();
+	unsigned tmin_idx = findMinHitIdx(rayOnObjects);
 
-	if (!std::isinf(objects[tmin_idx]->getRayHit().enter) && objects[tmin_idx]->getRayHit().enter >= -BIAS)
+	if (!std::isinf(rayOnObjects[tmin_idx].enter) && rayOnObjects[tmin_idx].enter >= -BIAS)
 	{
 		// calculate intersection point
-		Matrix<double>* temp = d.multiplyDot(objects[tmin_idx]->getRayHit().enter);
+		Matrix<double>* temp = d.multiplyDot(rayOnObjects[tmin_idx].enter);
 		Matrix<double>* rayOnObj = e + *temp;
 		temp->Erase(); delete temp;
-	    unsigned rayhit_type = objects[tmin_idx]->getRayHit().enter_type;
+	    unsigned rayhit_type = rayOnObjects[tmin_idx].enter_type;
 
 	    // direction vector from intersection to point light source
 		temp = *(li->getPosition()) - *rayOnObj;
@@ -154,8 +154,8 @@ color_t Raytracer::shade(Matrix<double> &e, Matrix<double> &d, int k)
 		unsigned idx = 0;
 		for (idx = 0; idx < objects.size(); ++idx)
 		{
-			objects[idx]->setRayHit(*rayOnObjPlus, *(li_inf->getDirOpposite()));
-			if (!std::isinf(objects[idx]->getRayHit().enter) && objects[idx]->getRayHit().enter >= -BIAS)
+			objects[idx]->setRayHit(*rayOnObjPlus, *(li_inf->getDirOpposite()), rayOnObjects[idx]);
+			if (!std::isinf(rayOnObjects[idx].enter) && rayOnObjects[idx].enter >= -BIAS)
 				break;
 		}
 		if (idx >= objects.size())
@@ -165,8 +165,8 @@ color_t Raytracer::shade(Matrix<double> &e, Matrix<double> &d, int k)
 		// i.e. whether current object is in shadow
 		for (idx = 0; idx < objects.size(); ++idx)
 		{
-			objects[idx]->setRayHit(*rayOnObjPlus, *surface_to_light);
-			if (!std::isinf(objects[idx]->getRayHit().enter) && objects[idx]->getRayHit().enter >= -BIAS)
+			objects[idx]->setRayHit(*rayOnObjPlus, *surface_to_light, rayOnObjects[idx]);
+			if (!std::isinf(rayOnObjects[idx].enter) && rayOnObjects[idx].enter >= -BIAS)
 				break;
 		}
 		if (idx >= objects.size())

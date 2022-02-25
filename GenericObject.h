@@ -20,14 +20,13 @@ public:
 	void setRefract(double val);
 	void setTransparency(double val);
 	void setAffineTransMat(Matrix<double> &mat);
-	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction) = 0;
+	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction, hit_t& rayOnObj) = 0;
 	
 	unsigned getType() const;
 	double getFallout() const;
 	double getReflect() const;
 	double getRefract() const;
 	double getTransparency() const;
-	const hit_t& getRayHit() const;
 	const color_t& getColor() const;
 	double getCoeff(unsigned light_type) const;
   Matrix<double>* getMInverse() const;
@@ -38,10 +37,9 @@ protected:
 	Matrix<double>* M, *M_i, *M_it;
 	color_t color;
 	double spec_coeff, diff_coeff, amb_coeff, fallout, reflect, refract, transparency;
-	hit_t rayOnObj;
-
-	void setHitEnterAndExit(double hit1, double hit2);
-	void resetHit();
+	
+	void setHitEnterAndExit(double hit1, double hit2, hit_t& rayOnObj);
+	void resetHit(hit_t& rayOnObj);
 	double calculateRealT(double t, Matrix<double> &e, Matrix<double> &e_s, Matrix<double> &d, Matrix<double> &d_s);
 };
 
@@ -50,7 +48,7 @@ class Sphere : public GenericObject
 public:
 	Sphere();
 	virtual ~Sphere();
-	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction);
+	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction, hit_t& rayOnObj);
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type);
 };
 
@@ -59,7 +57,7 @@ class Plane : public GenericObject
 public:
 	Plane();
 	virtual ~Plane();
-	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction);
+	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction, hit_t& rayOnObj);
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type);
 };
 class Cylinder : public GenericObject
@@ -67,7 +65,7 @@ class Cylinder : public GenericObject
 public:
 	Cylinder();
 	virtual ~Cylinder();
-	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction);
+	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction, hit_t& rayOnObj);
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type);
 };
 class Cone : public GenericObject
@@ -75,6 +73,6 @@ class Cone : public GenericObject
 public:
 	Cone();
 	virtual ~Cone();
-	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction);
+	virtual void setRayHit(Matrix<double> &start, Matrix<double> &direction, hit_t& rayOnObj);
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type);
 };

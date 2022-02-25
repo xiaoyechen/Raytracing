@@ -12,7 +12,7 @@ GenericObject::GenericObject()
 	transparency = 0;
 }
 
-void GenericObject::setHitEnterAndExit(double hit1, double hit2)
+void GenericObject::setHitEnterAndExit(double hit1, double hit2, hit_t& rayOnObj)
 {
   if (hit1 < -BIAS && hit2< -BIAS) return;
   
@@ -31,7 +31,7 @@ void GenericObject::setHitEnterAndExit(double hit1, double hit2)
 	}
 }
 
-void GenericObject::resetHit()
+void GenericObject::resetHit(hit_t& rayOnObj)
 {
 	rayOnObj.enter = INFINITY;
 	rayOnObj.exit = INFINITY;
@@ -162,11 +162,6 @@ double GenericObject::getTransparency() const
 	return transparency;
 }
 
-const hit_t& GenericObject::getRayHit() const
-{
-	return rayOnObj;
-}
-
 const color_t& GenericObject::getColor() const
 {
 	return color;
@@ -201,11 +196,11 @@ Cylinder::~Cylinder()
 {
 }
 
-void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
+void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction, hit_t& rayOnObj)
 {
 	// 3 possible intersection: cylinder wall, top cap, and bottom cap
 	// wall&top, wall&wall, wall&bottom, top&bottom
-	resetHit();
+	resetHit(rayOnObj);
 
 	// calculate transformed ray
 	Matrix<double>* temp = *M_i * direction;
@@ -241,7 +236,7 @@ void Cylinder::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		  // then the ray enter and exit at cylinder walls
 		  if (z1 >= -1 && z1 <= 1 && z2 >= -1 && z2 <= 1)
 		  {
-			  setHitEnterAndExit(t1, t2);
+			  setHitEnterAndExit(t1, t2, rayOnObj);
 
 			  start_s->Erase(); delete start_s;
 			  direction_s->Erase(); delete direction_s;
@@ -334,9 +329,9 @@ Plane::~Plane()
 {
 }
 
-void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
+void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction, hit_t& rayOnObj)
 {
-	resetHit();
+	resetHit(rayOnObj);
 		
 	Matrix<double>* temp = *M_i * direction;
 	Matrix<double>* direction_s = temp->normalize();
@@ -383,9 +378,9 @@ Sphere::~Sphere()
 {
 }
 
-void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
+void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction, hit_t& rayOnObj)
 {
-	resetHit();
+	resetHit(rayOnObj);
 
 	Matrix<double>* start_s = *M_i * start;
 	
@@ -415,7 +410,7 @@ void Sphere::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		if (t2 != t1)
 			t2 = calculateRealT(t2, start, *start_s, direction, *direction_s);
 		
-		setHitEnterAndExit(t1r, t2);
+		setHitEnterAndExit(t1r, t2, rayOnObj);
 	}
 
 	start_s->Erase(); delete start_s;
@@ -448,9 +443,9 @@ Cone::~Cone()
 {
 }
 
-void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
+void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction, hit_t& rayOnObj)
 {
-	resetHit();
+	resetHit(rayOnObj);
 
 	Matrix<double>* start_s = *M_i * start;
 	
@@ -484,7 +479,7 @@ void Cone::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 		  // we've found both hit times
 		  if (z1 >= -1 && z1 <= 1 && z2 >= -1 && z2 <= 1)
 		  {
-			  setHitEnterAndExit(t1, t2);
+			  setHitEnterAndExit(t1, t2, rayOnObj);
 
 			  start_s->Erase(); delete start_s;
 			  direction_s->Erase(); delete direction_s;
