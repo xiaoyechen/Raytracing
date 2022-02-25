@@ -18,7 +18,7 @@ Matrix<T>::Matrix(int height, int length)
 {
 }
 
-template<class T>
+template<typename T>
 Matrix<T>::Matrix(unsigned height, unsigned length)
 {
 	m_m = new T[(length + 1)*(height + 1)];
@@ -27,7 +27,7 @@ Matrix<T>::Matrix(unsigned height, unsigned length)
 	m_height = height;
 }
 
-template<class T>
+template<typename T>
 Matrix<T>::Matrix(int height, int length, T val)
 	: Matrix((unsigned)height, (unsigned)length)
 {
@@ -38,8 +38,8 @@ Matrix<T>::Matrix(int height, int length, T val)
 	}
 }
 
-template<class T>
-Matrix<T>::Matrix(int axis, double rotation_theta)
+template<typename T>
+Matrix<T>::Matrix(int axis, T rotation_theta)
 	:Matrix(3,3,0)
 {
 	assert(axis >= 1 && axis <= 3);
@@ -72,6 +72,7 @@ Matrix<T>::Matrix(int axis, double rotation_theta)
 	}
 }
 
+// copy constructor
 template<typename T>
 Matrix<T>::Matrix(const Matrix<T> &mat)
 	:Matrix(mat.getHeight(), mat.getLength())
@@ -79,31 +80,29 @@ Matrix<T>::Matrix(const Matrix<T> &mat)
 	copy(mat);
 }
 
+// move constructor
+template<typename T>
+Matrix<T>::Matrix(Matrix<T> &&mat)
+	:m_height(mat.getHeight()),
+	 m_length(mat.getLength()),
+	 m_m(mat.getMatrix())
+{
+	mat.m_m = nullptr;
+}
+
 template<typename T>
 Matrix<T>::~Matrix()
 {
-	delete[] m_m;
+	Erase();
 }
 
-template<class T>
-unsigned Matrix<T>::getLength() const
-{
-	return m_length;
-}
-
-template<class T>
-unsigned Matrix<T>::getHeight() const
-{
-	return m_height;
-}
-
-template<class T>
+template<typename T>
 void Matrix<T>::setLength(unsigned l)
 {
 	m_length = l;
 }
 
-template<class T>
+template<typename T>
 void Matrix<T>::setHeight(unsigned h)
 {
 	m_height = h;
@@ -128,7 +127,7 @@ T & Matrix<T>::operator()(int i, int j)
 	return m_m[i * (m_length + 1) + j];
 }
 
-template<class T>
+template<typename T>
 T Matrix<T>::operator()(int i, int j) const
 {
 	assert(i > 0 && i <= m_height && j > 0 && j <= m_length);
@@ -136,7 +135,7 @@ T Matrix<T>::operator()(int i, int j) const
 	return m_m[i * (m_length + 1) + j];
 }
 
-template<class T>
+template<typename T>
 void Matrix<T>::copy(const Matrix<T> &mat)
 {
 	assert(mat.getHeight() == m_height && mat.getLength() == m_length);
@@ -179,7 +178,7 @@ Matrix<T>* Matrix<T>::operator+(const Matrix<T>& matB)
 	return result;
 }
 
-template<class T>
+template<typename T>
 Matrix<T>* Matrix<T>::operator-(const Matrix<T>& matB)
 {
 	assert(m_length == matB.m_length && m_height == matB.m_height);
@@ -195,7 +194,7 @@ Matrix<T>* Matrix<T>::operator-(const Matrix<T>& matB)
 	return result;
 }
 
-template<class T>
+template<typename T>
 Matrix<T>* Matrix<T>::operator -()
 {
 	Matrix<T>* result = new Matrix<T>(m_height, m_length);
@@ -229,7 +228,7 @@ Matrix<T> * Matrix<T>::operator*(const Matrix<T> &matB)
 	return result;
 }
 
-template<class T>
+template<typename T>
 Matrix<T>* Matrix<T>::multiplyDot(T coeff)
 {
 	Matrix<T>* result = new Matrix<T>(m_height, m_length);
@@ -242,7 +241,7 @@ Matrix<T>* Matrix<T>::multiplyDot(T coeff)
 	return result;
 }
 
-template<class T>
+template<typename T>
 T Matrix<T>::multiplyDot(const Matrix<T>& matB)
 {
 	assert((m_length == 1 && matB.m_length == 1) && m_height == matB.m_height);
@@ -282,13 +281,13 @@ Matrix<T>* Matrix<T>::multiplyCross(Matrix<T>& matB)
 	return result;
 }
 
-template<class T>
-double Matrix<T>::normal()
+template<typename T>
+T Matrix<T>::normal()
 {
 	// make sure this is a vector
 	assert(m_length == 1 || m_height == 1);
 	
-	double sum = 0;
+	T sum = 0;
 	for (unsigned i = 1; i <= m_height; ++i)
 	{
 		for (unsigned j = 1; j <= m_length; ++j)
@@ -298,12 +297,12 @@ double Matrix<T>::normal()
 	return sqrt(sum);
 }
 
-template<class T>
+template<typename T>
 Matrix<T>* Matrix<T>::normalize()
 {
 	Matrix<T>* normalized = new Matrix<T>(m_height, m_length);
 
-	double n = normal();
+	T n = normal();
 
 	for (unsigned i = 1; i <= m_height; ++i)
 	{
@@ -314,7 +313,7 @@ Matrix<T>* Matrix<T>::normalize()
 	return normalized;
 }
 
-template<class T>
+template<typename T>
 Matrix<T>* Matrix<T>::transpose()
 {
 	Matrix<T>* result = new Matrix<T>(m_length, m_height);
@@ -327,13 +326,13 @@ Matrix<T>* Matrix<T>::transpose()
 	return result;
 }
 
-template<class T>
-double Matrix<T>::determinant()
+template<typename T>
+T Matrix<T>::determinant()
 {
 	assert(m_height >=1 && m_length >= 1);
 	assert(m_height == m_length);
 
-	double det = 0;
+	T det = 0;
 	if (m_height == 1)
 		det = (*this)(1, 1);
 	else if (m_height == 2)
@@ -405,7 +404,7 @@ Matrix<T>* Matrix<T>::cofactor()
 template<typename T>
 Matrix<T>* Matrix<T>::inverse()
 {
-	double det = determinant();
+	T det = determinant();
 
 	Matrix<T>* temp = cofactor();
 	Matrix<T>* result = temp->transpose();
@@ -419,7 +418,7 @@ Matrix<T>* Matrix<T>::inverse()
 	return result;
 }
 
-template<class T>
+template<typename T>
 bool Matrix<T>::isIden()
 {
 	for (unsigned i = 1; i <= m_height; ++i)

@@ -13,7 +13,7 @@ public:
 	static GenericObject* makeObject(unsigned id);
 	virtual ~GenericObject();
 	void setType(unsigned t);
-	void setColor(double r, double g, double b);
+	void setColor(float r, float g, float b);
 	void setColorCoeff(unsigned color_type, double coeff);
 	void setFallout(double val);
 	void setReflect(double val);
@@ -27,8 +27,8 @@ public:
 	double getReflect() const;
 	double getRefract() const;
 	double getTransparency() const;
-	hit_t getRayHit() const;
-	color_t getColor() const;
+	const hit_t& getRayHit() const;
+	const color_t& getColor() const;
 	double getCoeff(unsigned light_type) const;
   Matrix<double>* getMInverse() const;
 	virtual Matrix<double>* calculateSurfaceNormal(const Matrix<double> &intersection, unsigned hit_type)=0;

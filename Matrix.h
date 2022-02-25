@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-template<class T>
+template<typename T>
 class Matrix
 {
 public:
@@ -9,12 +9,16 @@ public:
 	Matrix(int height, int length);
 	Matrix(unsigned height, unsigned length);
 	Matrix(int height, int length, T val);
-	Matrix(int axis, double rotation_theta);
+	Matrix(int axis, T rotation_theta);
+	// copy constructor
 	Matrix(const Matrix<T> &mat);
+	// move constructor
+	Matrix(Matrix<T> &&mat);
 	~Matrix();
 	
-	unsigned getLength() const;
-	unsigned getHeight() const;
+	unsigned getLength() const { return m_length; }
+	unsigned getHeight() const { return m_height; }
+	T* getMatrix() { return m_m; }
 
 	void setLength(unsigned l);
 	void setHeight(unsigned h);
@@ -42,10 +46,10 @@ public:
 	Matrix<T>* multiplyDot(T coeff);
 	T multiplyDot(const Matrix<T> &matB);
 	Matrix<T>* multiplyCross(Matrix<T> &matB);
-	double normal();
+	T normal();
 	Matrix<T>* normalize();
 	Matrix<T>* transpose();
-	double determinant();
+	T determinant();
 	Matrix<T>* cofactor();
 	Matrix<T>* inverse();
 	bool isIden();

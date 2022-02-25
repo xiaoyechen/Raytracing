@@ -99,9 +99,9 @@ void Camera::setMperspective(double near, double far)
 	(*Mp)(4, 4) = 0;
 }
 
-void Camera::setTransformMatrices(double near, double angle, window_t w)
+void Camera::setTransformMatrices(double near, double angle, double wHeight, double wWidth)
 {
-	double aspect_ratio = w.width*1.0 / w.height;
+	double aspect_ratio = wWidth*1.0 / wHeight;
 
 	double top = near * tan(0.5*angle * M_PI / 180);
 	double bottom = -top;
@@ -117,8 +117,8 @@ void Camera::setTransformMatrices(double near, double angle, window_t w)
 	(*T1)(2, 4) = -(top + bottom) *0.5;
 
 	S2->identity();
-	(*S2)(1, 1) = w.width *0.5;
-	(*S2)(2, 2) = w.height *0.5;
+	(*S2)(1, 1) = wWidth *0.5;
+	(*S2)(2, 2) = wHeight *0.5;
 
 	T2->identity();
 	(*T2)(1, 4) = 1;
@@ -126,7 +126,7 @@ void Camera::setTransformMatrices(double near, double angle, window_t w)
 
 	W->identity();
 	(*W)(2, 2) = -1;
-	(*W)(2, 4) = w.height;
+	(*W)(2, 4) = wHeight;
 }
 
 void Camera::setRotationAngle(double angle)
@@ -282,3 +282,11 @@ Matrix<double>* Camera::calculateRotationalMatrix(const Matrix<double> &axis, do
 	return rmat;
 }
 
+void Camera::SetViewFrustum(double near, double far, double viewAngle, double wHeight, double wWidth)
+{
+	mNear = near;
+	mNearHeight = near*tan(M_PI / 180 * viewAngle * 0.5);
+	mNearWidth = mNearHeight * (wWidth / wHeight);
+	setMperspective(mNear, far);
+	setTransformMatrices(mNear, viewAngle, wHeight, wWidth);
+}

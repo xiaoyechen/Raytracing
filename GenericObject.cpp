@@ -93,7 +93,7 @@ void GenericObject::setType(unsigned t)
 	type = t;
 }
 
-void GenericObject::setColor(double r, double g, double b)
+void GenericObject::setColor(float r, float g, float b)
 {
 	color.r = r; color.g = g; color.b = b;
 }
@@ -162,12 +162,12 @@ double GenericObject::getTransparency() const
 	return transparency;
 }
 
-hit_t GenericObject::getRayHit() const
+const hit_t& GenericObject::getRayHit() const
 {
 	return rayOnObj;
 }
 
-color_t GenericObject::getColor() const
+const color_t& GenericObject::getColor() const
 {
 	return color;
 }
@@ -337,11 +337,10 @@ Plane::~Plane()
 void Plane::setRayHit(Matrix<double>& start, Matrix<double>& direction)
 {
 	resetHit();
+		
 	Matrix<double>* temp = *M_i * direction;
 	Matrix<double>* direction_s = temp->normalize();
-	
 	Matrix<double>* start_s = *M_i * start;
-
 	if ((*direction_s)(Z, 1) < -BIAS)
 	{
 		double t = -(*start_s)(Z, 1) / (*direction_s)(Z, 1);

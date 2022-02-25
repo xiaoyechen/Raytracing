@@ -40,7 +40,10 @@ struct window_t {
 };
 
 struct color_t {
-	double r, g, b;
+	float r, g, b;
+	color_t() : r(0), g(0), b(0) {}
+	color_t(float rval, float gval, float bval) : r(rval), g(gval), b(bval) {}
+	
 };
 
 struct hit_t {
