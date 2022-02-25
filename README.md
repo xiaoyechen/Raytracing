@@ -1,6 +1,6 @@
 # Raytracing
 
-!Current scene preview(preview512x288.png)
+![Current scene preview](preview512x288.png)
 
 Simple ray tracer program using X11 library
 
